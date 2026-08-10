@@ -279,42 +279,45 @@ class DiffusionAnalyzer(MSONable):
             # calculate regional msd and number of diffusing specie in those regions
             msd_c_range = np.zeros_like(dt, dtype=np.double)
             msd_c_range_components = np.zeros((*dt.shape, 3))
-            indices_c_range = []
+            # list of per-timestep lists of ion indices found within c_ranges
+            indices_c_range: list[list[int]] = []
             for i, n in enumerate(timesteps):
                 if not smoothed:
                     dx = dc[:, i : i + 1, :]
-                    dcomponents = dc[:, i : i + 1, :]
                 elif smoothed == "constant":
                     dx = dc[:, i : i + avg_nsteps, :] - dc[:, 0:avg_nsteps, :]
-                    dcomponents = dc[:, i : i + avg_nsteps, :] - dc[:, 0:avg_nsteps, :]
                 else:
                     dx = dc[:, n:, :] - dc[:, :-n, :]
-                    dcomponents = dc[:, n:, :] - dc[:, :-n, :]
 
                 # Get msd
                 sq_disp = dx**2
                 sq_disp_ions[:, i] = np.average(np.sum(sq_disp, axis=2), axis=1)
                 msd[i] = np.average(sq_disp_ions[:, i][indices])
-                msd_components[i] = np.average(dcomponents[indices] ** 2, axis=(0, 1))
+                msd_components[i] = np.average(sq_disp[indices], axis=(0, 1))
 
                 # Get regional msd
                 if c_ranges and structures:
                     if not c_range_include_edge:
-                        for index in indices:
+                        indices_c_range_i = [
+                            index
+                            for index in indices
                             if any(
                                 lower < structures[i][index].c < upper and lower < structures[i + 1][index].c < upper
                                 for (lower, upper) in c_ranges
-                            ):
-                                indices_c_range.append(index)
+                            )
+                        ]
                     else:
-                        for index in indices:
+                        indices_c_range_i = [
+                            index
+                            for index in indices
                             if any(
                                 lower <= structures[i][index].c <= upper or lower <= structures[i + 1][index].c <= upper
                                 for (lower, upper) in c_ranges
-                            ):
-                                indices_c_range.append(index)
-                    msd_c_range[i] = np.average(sq_disp_ions[:, i][indices_c_range])
-                    msd_c_range_components[i] = np.average(dcomponents[indices_c_range] ** 2, axis=(0, 1))
+                            )
+                        ]
+                    indices_c_range.append(indices_c_range_i)
+                    msd_c_range[i] = np.average(sq_disp_ions[:, i][indices_c_range_i])
+                    msd_c_range_components[i] = np.average(sq_disp[indices_c_range_i], axis=(0, 1))
 
                 # Get mscd
                 sq_chg_disp = np.sum(dx[indices, :, :], axis=0) ** 2
