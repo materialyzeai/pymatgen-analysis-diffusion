@@ -46,6 +46,46 @@ __status__ = "Beta"
 __date__ = "5/2/13"
 
 
+def _msd_from_positions_fft(pos: np.ndarray) -> np.ndarray:
+    """
+    Multi-time-origin MSD via FFT autocorrelation (Wiener-Khinchin theorem),
+    batched over a leading "particle" axis and a trailing coordinate axis.
+
+    For each particle p, dimension d, and lag m:
+
+        MSD[p, m, d] = 1/(N-m) * sum_{t=0}^{N-m-1} (pos[p, t+m, d] - pos[p, t, d])^2
+
+    i.e. the displacement over lag m, averaged over every time origin t.
+    This is the definition used by the windowed ("max") MSD smoothing mode,
+    and (applied to a summed pseudo-trajectory of the diffusing species) by
+    the charge MSD. Using the standard S1 - 2*S2 decomposition (S1 via
+    prefix sums, S2 via FFT autocorrelation) computes MSD at every lag
+    0..N-1 for all particles/dimensions in a couple of vectorized calls,
+    instead of the O(n_lags * n_particles * N) cost of explicitly
+    subtracting shifted copies of the trajectory for each lag.
+
+    Args:
+        pos: Array of shape (n_particles, N, dim).
+
+    Returns:
+        Array of shape (n_particles, N, dim) of per-dimension MSD at each lag.
+    """
+    n_particles, n, dim = pos.shape
+
+    f = np.fft.fft(pos, n=2 * n, axis=1)
+    corr = np.fft.ifft(f * np.conjugate(f), axis=1).real[:, :n, :]
+    m = np.arange(n)
+    norm = (n - m)[None, :, None]
+    s2 = corr / norm
+
+    sq = pos**2
+    prefix = np.concatenate([np.zeros((n_particles, 1, dim)), np.cumsum(sq, axis=1)], axis=1)
+    total = prefix[:, -1:, :]
+    s1 = (prefix[:, n - m, :] + (total - prefix[:, m, :])) / norm
+
+    return s1 - 2 * s2
+
+
 class DiffusionAnalyzer(MSONable):
     """
     Class for performing diffusion analysis.
@@ -281,19 +321,33 @@ class DiffusionAnalyzer(MSONable):
             msd_c_range_components = np.zeros((*dt.shape, 3))
             # list of per-timestep lists of ion indices found within c_ranges
             indices_c_range: list[list[int]] = []
+
+            # For the windowed (all-time-origins-averaged) smoothing mode used
+            # by everything other than smoothed=False/"constant", MSD at every
+            # lag can be computed in one vectorized pass via FFT autocorrelation
+            # instead of looping over lags and re-slicing dc each time.
+            fast_windowed_msd = bool(smoothed) and smoothed != "constant"
+            if fast_windowed_msd:
+                agg_disp = dc[indices].sum(axis=0, keepdims=True)
+                per_dim_msd_full = _msd_from_positions_fft(np.concatenate([dc, agg_disp], axis=0))
+                ion_msd_full = per_dim_msd_full[:_nions]
+                mscd_full = per_dim_msd_full[_nions].sum(axis=1) / len(indices)
+
             for i, n in enumerate(timesteps):
-                if not smoothed:
-                    dx = dc[:, i : i + 1, :]
-                elif smoothed == "constant":
-                    dx = dc[:, i : i + avg_nsteps, :] - dc[:, 0:avg_nsteps, :]
+                if fast_windowed_msd:
+                    per_ion_dim = ion_msd_full[:, n, :]
+                    mscd[i] = mscd_full[n]
                 else:
-                    dx = dc[:, n:, :] - dc[:, :-n, :]
+                    # smoothed == "constant" when fast_windowed_msd is False and smoothed is truthy
+                    dx = dc[:, i : i + 1, :] if not smoothed else dc[:, i : i + avg_nsteps, :] - dc[:, 0:avg_nsteps, :]
+                    per_ion_dim = np.average(dx**2, axis=1)
+                    sq_chg_disp = np.sum(dx[indices, :, :], axis=0) ** 2
+                    mscd[i] = np.average(np.sum(sq_chg_disp, axis=1), axis=0) / len(indices)
 
                 # Get msd
-                sq_disp = dx**2
-                sq_disp_ions[:, i] = np.average(np.sum(sq_disp, axis=2), axis=1)
+                sq_disp_ions[:, i] = per_ion_dim.sum(axis=1)
                 msd[i] = np.average(sq_disp_ions[:, i][indices])
-                msd_components[i] = np.average(sq_disp[indices], axis=(0, 1))
+                msd_components[i] = np.average(per_ion_dim[indices], axis=0)
 
                 # Get regional msd
                 if c_ranges and structures:
@@ -317,11 +371,7 @@ class DiffusionAnalyzer(MSONable):
                         ]
                     indices_c_range.append(indices_c_range_i)
                     msd_c_range[i] = np.average(sq_disp_ions[:, i][indices_c_range_i])
-                    msd_c_range_components[i] = np.average(sq_disp[indices_c_range_i], axis=(0, 1))
-
-                # Get mscd
-                sq_chg_disp = np.sum(dx[indices, :, :], axis=0) ** 2
-                mscd[i] = np.average(np.sum(sq_chg_disp, axis=1), axis=0) / len(indices)
+                    msd_c_range_components[i] = np.average(per_ion_dim[indices_c_range_i], axis=0)
 
             conv_factor = get_conversion_factor(self.structure, self.specie, self.temperature)
             self.diffusivity, self.diffusivity_std_dev = get_diffusivity_from_msd(msd, dt, smoothed)
