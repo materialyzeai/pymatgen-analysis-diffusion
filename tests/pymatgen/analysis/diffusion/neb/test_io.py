@@ -5,6 +5,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from pymatgen.core import Structure
+from pymatgen.io.vasp.inputs import Incar
 
 from pymatgen.analysis.diffusion.neb.io import (
     MVLCINEBEndPointSet,
@@ -90,7 +91,7 @@ NPAR = 4
 NSW = 100
 PREC = Accurate
 SIGMA = 0.05"""
-        assert incar_string.strip() == incar_expect.strip()
+        assert Incar.from_str(incar_string) == Incar.from_str(incar_expect)
 
 
 class MVLCINEBSetTest(unittest.TestCase):
