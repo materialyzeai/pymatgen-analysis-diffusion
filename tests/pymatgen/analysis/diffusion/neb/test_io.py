@@ -91,9 +91,6 @@ NPAR = 4
 NSW = 100
 PREC = Accurate
 SIGMA = 0.05"""
-        # Compare parsed Incar objects, not raw text: some INCAR parameters
-        # (e.g. NELECT) are typed as float vs int depending on the installed
-        # pymatgen version, and int/float compare equal in Python.
         assert Incar.from_str(incar_string) == Incar.from_str(incar_expect)
 
 
