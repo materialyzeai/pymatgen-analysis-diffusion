@@ -30,6 +30,7 @@ from pymatgen.core.structure import Structure
 from pymatgen.io.vasp.outputs import Vasprun
 from pymatgen.util.coord import pbc_diff
 from pymatgen.util.plotting import pretty_plot
+from scipy.fft import irfft, next_fast_len, rfft
 from scipy.optimize import curve_fit
 
 if TYPE_CHECKING:
@@ -46,7 +47,9 @@ __status__ = "Beta"
 __date__ = "5/2/13"
 
 
-def _msd_from_positions_fft(pos: np.ndarray) -> np.ndarray:
+def _msd_from_positions_fft(
+    pos: np.ndarray, block_size: int | None = None, max_block_bytes: int = 256_000_000
+) -> np.ndarray:
     """
     Multi-time-origin MSD via FFT autocorrelation (Wiener-Khinchin theorem),
     batched over a leading "particle" axis and a trailing coordinate axis.
@@ -64,26 +67,49 @@ def _msd_from_positions_fft(pos: np.ndarray) -> np.ndarray:
     instead of the O(n_lags * n_particles * N) cost of explicitly
     subtracting shifted copies of the trajectory for each lag.
 
+    The transform is done in blocks of particles so the transient memory is
+    bounded by the block rather than the whole input, uses the real-input FFT
+    (the positions are real), and zero-pads to the nearest fast FFT length at
+    or above 2N rather than exactly 2N (which can have large prime factors
+    and be several times slower).
+
     Args:
         pos: Array of shape (n_particles, N, dim).
+        block_size: Number of particles transformed at once. Default None
+            picks the largest block whose transient arrays fit in
+            ``max_block_bytes``.
+        max_block_bytes: Approximate transient memory budget per block, used
+            only when block_size is None. The output array (same shape as
+            ``pos``) is allocated in addition to this.
 
     Returns:
         Array of shape (n_particles, N, dim) of per-dimension MSD at each lag.
     """
     n_particles, n, dim = pos.shape
-
-    f = np.fft.fft(pos, n=2 * n, axis=1)
-    corr = np.fft.ifft(f * np.conjugate(f), axis=1).real[:, :n, :]
+    n_fft = next_fast_len(2 * n, real=True)
     m = np.arange(n)
     norm = (n - m)[None, :, None]
-    s2 = corr / norm
+    if block_size is None:
+        # Per particle: the half-spectrum (complex128, n_fft/2+1) plus the
+        # padded inverse transform and ~4 length-N float64 work arrays.
+        per_particle_bytes = dim * 8 * (n_fft + n_fft + 4 * n)
+        block_size = max(1, min(n_particles, max_block_bytes // per_particle_bytes))
 
-    sq = pos**2
-    prefix = np.concatenate([np.zeros((n_particles, 1, dim)), np.cumsum(sq, axis=1)], axis=1)
-    total = prefix[:, -1:, :]
-    s1 = (prefix[:, n - m, :] + (total - prefix[:, m, :])) / norm
+    out = np.empty((n_particles, n, dim), dtype=np.float64)
+    for start in range(0, n_particles, block_size):
+        x = np.asarray(pos[start : start + block_size], dtype=np.float64)
+        f = rfft(x, n=n_fft, axis=1)
+        f *= np.conjugate(f)
+        corr = irfft(f, n=n_fft, axis=1)[:, :n, :]
+        del f
+        s2 = corr / norm
 
-    return s1 - 2 * s2
+        prefix = np.concatenate([np.zeros((x.shape[0], 1, dim)), np.cumsum(x**2, axis=1)], axis=1)
+        total = prefix[:, -1:, :]
+        s1 = (prefix[:, n - m, :] + (total - prefix[:, m, :])) / norm
+
+        out[start : start + block_size] = s1 - 2 * s2
+    return out
 
 
 class DiffusionAnalyzer(MSONable):
