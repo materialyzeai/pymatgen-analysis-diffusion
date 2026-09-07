@@ -183,7 +183,7 @@ class MigrationGraph(MSONable):
             A constructed MigrationGraph object
         """
         only_sites = get_only_sites_from_structure(structure, migrating_specie)
-        migration_graph = StructureGraph.with_local_env_strategy(only_sites, nn)
+        migration_graph = StructureGraph.from_local_env_strategy(only_sites, nn)
         return cls(structure=structure, m_graph=migration_graph, **kwargs)
 
     @classmethod
@@ -209,7 +209,7 @@ class MigrationGraph(MSONable):
             A constructed MigrationGraph object
         """
         only_sites = get_only_sites_from_structure(structure, migrating_specie)
-        migration_graph = StructureGraph.with_local_env_strategy(
+        migration_graph = StructureGraph.from_local_env_strategy(
             only_sites,
             MinimumDistanceNN(cutoff=max_distance, get_all_sites=True),
         )
