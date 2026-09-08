@@ -5,6 +5,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from pymatgen.core import Structure
+from pymatgen.io.vasp.inputs import Incar
 
 from pymatgen.analysis.diffusion.neb.io import (
     MVLCINEBEndPointSet,
@@ -24,6 +25,14 @@ test_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)))
 def get_path(path_str: PathLike, dirname: PathLike = "./") -> str:
     cwd = os.path.abspath(os.path.dirname(__file__))
     return os.path.join(cwd, dirname, path_str)
+
+
+def expected_incar_str(incar_expect: str, **kwargs) -> str:
+    """Re-render an expected INCAR through pymatgen so value formatting matches the installed version.
+
+    For example, newer pymatgen writes NELECT as a float (576.0) where older versions wrote 576.
+    """
+    return Incar.from_str(incar_expect).get_str(sort_keys=True, **kwargs).strip()
 
 
 class MVLCINEBEndPointSetTest(unittest.TestCase):
@@ -54,7 +63,7 @@ NELMIN   =  4
 NSW      =  99
 PREC     =  Accurate
 SIGMA    =  0.05"""
-        assert incar_string == incar_expect
+        assert incar_string.strip() == expected_incar_str(incar_expect, pretty=True)
 
     def test_incar_user_setting(self) -> None:
         user_incar_settings = {
@@ -90,7 +99,7 @@ NPAR = 4
 NSW = 100
 PREC = Accurate
 SIGMA = 0.05"""
-        assert incar_string.strip() == incar_expect.strip()
+        assert incar_string.strip() == expected_incar_str(incar_expect)
 
 
 class MVLCINEBSetTest(unittest.TestCase):
@@ -128,7 +137,7 @@ POTIM = 0.0
 PREC = Accurate
 SIGMA = 0.05
 SPRING = -5"""
-        assert incar_string.strip() == incar_expect.strip()
+        assert incar_string.strip() == expected_incar_str(incar_expect)
 
     def test_incar_user_setting(self) -> None:
         user_incar_settings = {"IOPT": 3, "EDIFFG": -0.05, "NPAR": 4, "ISIF": 3}
@@ -163,7 +172,7 @@ POTIM    =  0.0
 PREC     =  Accurate
 SIGMA    =  0.05
 SPRING   =  -5"""
-        assert incar_string.strip() == incar_expect.strip()
+        assert incar_string.strip() == expected_incar_str(incar_expect, pretty=True)
 
 
 class UtilityTest(unittest.TestCase):
