@@ -1,4 +1,4 @@
 pymatgen==2026.5.4
-joblib==1.5.3
+joblib==1.6.0
 ase==3.28.0
 seaborn==0.13.2
