@@ -27,6 +27,14 @@ def get_path(path_str: PathLike, dirname: PathLike = "./") -> str:
     return os.path.join(cwd, dirname, path_str)
 
 
+def expected_incar_str(incar_expect: str, **kwargs) -> str:
+    """Re-render an expected INCAR through pymatgen so value formatting matches the installed version.
+
+    For example, newer pymatgen writes NELECT as a float (576.0) where older versions wrote 576.
+    """
+    return Incar.from_str(incar_expect).get_str(sort_keys=True, **kwargs).strip()
+
+
 class MVLCINEBEndPointSetTest(unittest.TestCase):
     endpoint = Structure.from_file(get_path("POSCAR0", dirname="io_files"))
 
@@ -55,7 +63,7 @@ NELMIN   =  4
 NSW      =  99
 PREC     =  Accurate
 SIGMA    =  0.05"""
-        assert incar_string == incar_expect
+        assert incar_string.strip() == expected_incar_str(incar_expect, pretty=True)
 
     def test_incar_user_setting(self) -> None:
         user_incar_settings = {
@@ -129,7 +137,7 @@ POTIM = 0.0
 PREC = Accurate
 SIGMA = 0.05
 SPRING = -5"""
-        assert incar_string.strip() == incar_expect.strip()
+        assert incar_string.strip() == expected_incar_str(incar_expect)
 
     def test_incar_user_setting(self) -> None:
         user_incar_settings = {"IOPT": 3, "EDIFFG": -0.05, "NPAR": 4, "ISIF": 3}
@@ -164,7 +172,7 @@ POTIM    =  0.0
 PREC     =  Accurate
 SIGMA    =  0.05
 SPRING   =  -5"""
-        assert incar_string.strip() == incar_expect.strip()
+        assert incar_string.strip() == expected_incar_str(incar_expect, pretty=True)
 
 
 class UtilityTest(unittest.TestCase):

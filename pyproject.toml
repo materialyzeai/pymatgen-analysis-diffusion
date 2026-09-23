@@ -12,7 +12,7 @@ maintainers = [
 ]
 description = "Pymatgen add-on for diffusion analysis."
 readme = "README.rst"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 keywords = [
     "ABINIT",
     "analysis",
@@ -33,7 +33,6 @@ keywords = [
 license = { text = "BSD" }
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Development Status :: 4 - Beta",
@@ -47,7 +46,7 @@ classifiers = [
 ]
 dependencies = [
     'numpy>=1.25.0,<3.0',
-    "pymatgen>=2024.6.10",
+    "pymatgen>=2026.5.4",
     "joblib",
     "ase",
     "seaborn"
@@ -80,7 +79,7 @@ include = ["pymatgen.*"]
 
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 120
 lint.select = [
     "ANN", # flake8-annotations
