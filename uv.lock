@@ -2285,14 +2285,14 @@ wheels = [
 
 [[package]]
 name = "pymatgen"
-version = "2026.5.4"
+version = "2026.9.24"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pymatgen-core" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/0c/a1/727feae7083bb3b10ba9d43ccbbe83317d4654957a08cee52096ef86bfde/pymatgen-2026.5.4.tar.gz", hash = "sha256:4998d6084da72224c8025dc1e9645b2aab73896109a7ef1e05bd479a25a55b79", size = 743199, upload-time = "2026-05-04T22:03:24.675Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f7/db/ce703b4d36836ef703986f3f7c6cdcd3d5318b3a107d5cd70c13209b76aa/pymatgen-2026.9.24.tar.gz", hash = "sha256:eaefbf34e4bc0546543a1e7502efef1d96bce5ef26d882c302caa3fee4469f00", size = 774675, upload-time = "2026-09-23T02:00:50.139Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/3a/de29b0b6c1740098c3ccdd3fa69336dc39b5efc6840a55e30dcaea01a19b/pymatgen-2026.5.4-py3-none-any.whl", hash = "sha256:7815cd4310c6d5a465b0da14a1633479cf61366676e62764db17f7e2a20d1974", size = 829056, upload-time = "2026-05-04T22:03:22.327Z" },
+    { url = "https://files.pythonhosted.org/packages/6b/db/ed35b02b2c88d6bb53961aa9cd9c1b26cf5a47998dd4de350d7b720f70b9/pymatgen-2026.9.24-py3-none-any.whl", hash = "sha256:33273cafc0f83feef15d4ce8edd6e161e0a4d4059559c108598d6414c99aa7ca", size = 825810, upload-time = "2026-09-23T02:00:47.726Z" },
 ]
 
 [[package]]
@@ -2337,7 +2337,7 @@ requires-dist = [
     { name = "joblib" },
     { name = "maggma", marker = "extra == 'ci'" },
     { name = "numpy", specifier = ">=1.25.0,<3.0" },
-    { name = "pymatgen", specifier = ">=2026.5.4" },
+    { name = "pymatgen", specifier = ">=2026.9.23" },
     { name = "pytest", marker = "extra == 'ci'", specifier = ">=8" },
     { name = "pytest-cov", marker = "extra == 'ci'", specifier = ">=4" },
     { name = "pytest-split", marker = "extra == 'ci'", specifier = ">=0.8" },

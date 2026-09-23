@@ -4,12 +4,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pymatgen.analysis.diffusion.aimd.van_hove &#8212; pymatgen-diffusion 2025.10.7 documentation</title>
+    <title>pymatgen.analysis.diffusion.aimd.van_hove &#8212; pymatgen-diffusion 2026.9.24 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../../../_static/flasky.css?v=8156beb0" />
-    <script src="../../../../../_static/documentation_options.js?v=708802d9"></script>
-    <script src="../../../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../_static/documentation_options.js?v=3e3b5833"></script>
+    <script src="../../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../../search.html" />
 
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../../index.html">pymatgen-diffusion 2025.10.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">pymatgen-diffusion 2026.9.24 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">pymatgen.analysis.diffusion.aimd.van_hove</a></li> 
       </ul>
@@ -49,7 +49,7 @@
 <span></span><span class="c1"># Copyright (c) Materials Virtual Lab.</span>
 <span class="c1"># Distributed under the terms of the BSD License.</span>
 
-<span class="sd">&quot;&quot;&quot;Van Hove analysis for correlations.&quot;&quot;&quot;</span>
+<span class="sd">"""Van Hove analysis for correlations."""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -76,24 +76,24 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.analysis.diffusion.analyzer</span><span class="w"> </span><span class="kn">import</span> <span class="n">DiffusionAnalyzer</span>
 
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Iek-Heng Chu&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;1.0&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;Aug 9, 2017&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">"Iek-Heng Chu"</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">"1.0"</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">"Aug 9, 2017"</span>
 
 
 <div class="viewcode-block" id="VanHoveAnalysis">
 <a class="viewcode-back" href="../../../../../pymatgen.analysis.diffusion.aimd.van_hove.html#pymatgen.analysis.diffusion.aimd.van_hove.VanHoveAnalysis">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">VanHoveAnalysis</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Class for van Hove function analysis.</span>
 
 <span class="sd">    In particular, self-part (Gs) and distinct-part (Gd) of the van Hove correlation function G(r,t) for given species</span>
 <span class="sd">    and given structure are computed. If you use this class, please consider citing the following paper::</span>
 
-<span class="sd">        Zhu, Z.; Chu, I.-H.; Deng, Z. and Ong, S. P. &quot;Role of Na+ Interstitials</span>
+<span class="sd">        Zhu, Z.; Chu, I.-H.; Deng, Z. and Ong, S. P. "Role of Na+ Interstitials</span>
 <span class="sd">        and Dopants in Enhancing the Na+ Conductivity of the Cubic Na3PS4</span>
-<span class="sd">        Superionic Conductor&quot;. Chem. Mater. (2015), 27, pp 8318-8325</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        Superionic Conductor". Chem. Mater. (2015), 27, pp 8318-8325</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -104,11 +104,11 @@
         <span class="n">step_skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
         <span class="n">sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
         <span class="n">cell_range</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">species</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">SpeciesLike</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Li&quot;</span><span class="p">,</span> <span class="s2">&quot;Na&quot;</span><span class="p">),</span>
+        <span class="n">species</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">SpeciesLike</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"Li"</span><span class="p">,</span> <span class="s2">"Na"</span><span class="p">),</span>
         <span class="n">reference_species</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">indices</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Initiation.</span>
 
 <span class="sd">        Args:</span>
@@ -124,30 +124,30 @@
 <span class="sd">                with supercell. Default is 1, i.e. including the adjacent image</span>
 <span class="sd">                cells along all three directions.</span>
 <span class="sd">            species ([string]): a list of specie symbols of interest.</span>
-<span class="sd">            reference_species ([string]): Set this option along with &#39;species&#39;</span>
+<span class="sd">            reference_species ([string]): Set this option along with 'species'</span>
 <span class="sd">                parameter to calculate the distinct-part of van Hove function.</span>
 <span class="sd">                Note that the self-part of van Hove function is always computed</span>
-<span class="sd">                only for those in &quot;species&quot; parameter.</span>
+<span class="sd">                only for those in "species" parameter.</span>
 <span class="sd">            indices (list of int): If not None, only a subset of atomic indices</span>
-<span class="sd">                will be selected for the analysis. If this is given, &quot;species&quot;</span>
+<span class="sd">                will be selected for the analysis. If this is given, "species"</span>
 <span class="sd">                parameter will be ignored.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># initial check</span>
         <span class="k">if</span> <span class="n">step_skip</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;skip_step should be &gt;=1!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"skip_step should be &gt;=1!"</span><span class="p">)</span>
 
         <span class="n">_n_ions</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">,</span> <span class="n">_ndim</span> <span class="o">=</span> <span class="n">diffusion_analyzer</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">shape</span>
 
         <span class="k">if</span> <span class="n">nsteps</span> <span class="o">&lt;=</span> <span class="n">avg_nsteps</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of timesteps is too small!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Number of timesteps is too small!"</span><span class="p">)</span>
 
         <span class="n">ntsteps</span> <span class="o">=</span> <span class="n">nsteps</span> <span class="o">-</span> <span class="n">avg_nsteps</span>
 
         <span class="k">if</span> <span class="n">ngrid</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Ntot should be greater than 1!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Ntot should be greater than 1!"</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">sigma</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;sigma should be &gt; 0!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"sigma should be &gt; 0!"</span><span class="p">)</span>
 
         <span class="n">dr</span> <span class="o">=</span> <span class="n">rmax</span> <span class="o">/</span> <span class="p">(</span><span class="n">ngrid</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">interval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">rmax</span><span class="p">,</span> <span class="n">ngrid</span><span class="p">)</span>
@@ -256,38 +256,38 @@
 
 <div class="viewcode-block" id="VanHoveAnalysis.get_3d_plot">
 <a class="viewcode-back" href="../../../../../pymatgen.analysis.diffusion.aimd.van_hove.html#pymatgen.analysis.diffusion.aimd.van_hove.VanHoveAnalysis.get_3d_plot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_3d_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;distinct&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_3d_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"distinct"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Plot 3D self-part or distinct-part of van Hove function, which is</span>
-<span class="sd">        specified by the input argument &#39;type&#39;.</span>
+<span class="sd">        specified by the input argument 'type'.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            figsize (tuple): fig size in inches.</span>
-<span class="sd">            mode (str): &#39;distinct&#39; or &#39;both&#39;.</span>
+<span class="sd">            mode (str): 'distinct' or 'both'.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            matplotlib.axes._subplots.Axes: axes object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;distinct&quot;</span><span class="p">,</span> <span class="s2">&quot;self&quot;</span><span class="p">]</span>
+<span class="sd">        """</span>
+        <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"distinct"</span><span class="p">,</span> <span class="s2">"self"</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;distinct&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"distinct"</span><span class="p">:</span>
             <span class="n">grt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdrt</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">vmax</span> <span class="o">=</span> <span class="mf">4.0</span>
             <span class="n">cb_ticks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
-            <span class="n">cb_label</span> <span class="o">=</span> <span class="s2">&quot;$G_d$($t$,$r$)&quot;</span>
+            <span class="n">cb_label</span> <span class="o">=</span> <span class="s2">"$G_d$($t$,$r$)"</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">grt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gsrt</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="n">vmax</span> <span class="o">=</span> <span class="mf">1.0</span>
             <span class="n">cb_ticks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="n">cb_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;4$\pi r^2G_s$($t$,$r$)&quot;</span>
+            <span class="n">cb_label</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"4$\pi r^2G_s$($t$,$r$)"</span>
 
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">grt</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">grt</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeskip</span>
-        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">&quot;ij&quot;</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">indexing</span><span class="o">=</span><span class="s2">"ij"</span><span class="p">)</span>
 
         <span class="n">ticksize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">2.5</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">"w"</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="n">ticksize</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="n">ticksize</span><span class="p">)</span>
 
@@ -295,9 +295,9 @@
 
         <span class="n">labelsize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">grt</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">grt</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time (ps)&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">labelsize</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$r$ ($\AA$)&quot;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">labelsize</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">grt</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"jet"</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="n">grt</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Time (ps)"</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">labelsize</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$r$ ($\AA$)"</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">labelsize</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
 
@@ -312,11 +312,11 @@
 <a class="viewcode-back" href="../../../../../pymatgen.analysis.diffusion.aimd.van_hove.html#pymatgen.analysis.diffusion.aimd.van_hove.VanHoveAnalysis.get_1d_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_1d_plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;distinct&quot;</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"distinct"</span><span class="p">,</span>
         <span class="n">times</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">colors</span><span class="p">:</span> <span class="nb">list</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Plot the van Hove function at given r or t.</span>
 
 <span class="sd">        Args:</span>
@@ -324,26 +324,26 @@
 <span class="sd">            times (list of float): Time moments (in ps) in which the van Hove</span>
 <span class="sd">                            function will be plotted.</span>
 <span class="sd">            colors (list strings/tuples): Additional color settings. If not set,</span>
-<span class="sd">                            seaborn.color_plaette(&quot;Set1&quot;, 10) will be used.</span>
+<span class="sd">                            seaborn.color_plaette("Set1", 10) will be used.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            matplotlib.axes._subplots.Axes: axes object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">times</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">colors</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">(</span><span class="s2">&quot;Set1&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">color_palette</span><span class="p">(</span><span class="s2">"Set1"</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
 
-        <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;distinct&quot;</span><span class="p">,</span> <span class="s2">&quot;self&quot;</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">mode</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"distinct"</span><span class="p">,</span> <span class="s2">"self"</span><span class="p">]</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;distinct&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"distinct"</span><span class="p">:</span>
             <span class="n">grt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gdrt</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">ylabel</span> <span class="o">=</span> <span class="s2">&quot;$G_d$($t$,$r$)&quot;</span>
+            <span class="n">ylabel</span> <span class="o">=</span> <span class="s2">"$G_d$($t$,$r$)"</span>
             <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.005</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">grt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gsrt</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">ylabel</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;4$\pi r^2G_s$($t$,$r$)&quot;</span>
+            <span class="n">ylabel</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">"4$\pi r^2G_s$($t$,$r$)"</span>
             <span class="n">ylim</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.005</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
 
         <span class="n">ax</span> <span class="o">=</span> <span class="n">pretty_plot</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
@@ -352,12 +352,12 @@
             <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">time</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeskip</span><span class="p">))</span>
             <span class="n">index</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">grt</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
             <span class="n">new_time</span> <span class="o">=</span> <span class="n">index</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeskip</span>
-            <span class="n">label</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_time</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; ps&quot;</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_time</span><span class="p">)</span> <span class="o">+</span> <span class="s2">" ps"</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span> <span class="n">grt</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">4.0</span><span class="p">)</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;$r$ ($\AA$)&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s2">"$r$ ($\AA$)"</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper right&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">36</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"upper right"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">36</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
@@ -369,10 +369,10 @@
 <div class="viewcode-block" id="EvolutionAnalyzer">
 <a class="viewcode-back" href="../../../../../pymatgen.analysis.diffusion.aimd.van_hove.html#pymatgen.analysis.diffusion.aimd.van_hove.EvolutionAnalyzer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">EvolutionAnalyzer</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Analyze the evolution of structures during AIMD simulations.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Analyze the evolution of structures during AIMD simulations."""</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structures</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">rmax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">time_step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Initialization the EvolutionAnalyzer from MD simulations. From the</span>
 <span class="sd">        structures obtained from MD simulations, we can analyze the structure</span>
 <span class="sd">        evolution with time by some quantitative characterization such as RDF</span>
@@ -380,9 +380,9 @@
 
 <span class="sd">        If you use this class, please consider citing the following paper:</span>
 <span class="sd">        Tang, H.; Deng, Z.; Lin, Z.; Wang, Z.; Chu, I-H; Chen, C.; Zhu, Z.;</span>
-<span class="sd">        Zheng, C.; Ong, S. P. &quot;Probing Solid-Solid Interfacial Reactions in</span>
+<span class="sd">        Zheng, C.; Ong, S. P. "Probing Solid-Solid Interfacial Reactions in</span>
 <span class="sd">        All-Solid-State Sodium-Ion Batteries with First-Principles</span>
-<span class="sd">        Calculations&quot;, Chem. Mater. (2018), 30(1), pp 163-173.</span>
+<span class="sd">        Calculations", Chem. Mater. (2018), 30(1), pp 163-173.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            structures ([Structure]): The list of structures obtained from MD</span>
@@ -391,7 +391,7 @@
 <span class="sd">            step (int): indicate the interval of input structures, which is used</span>
 <span class="sd">                to calculated correct time step.</span>
 <span class="sd">            time_step(int): the time step in fs, POTIM in INCAR.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pairs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pairs</span><span class="p">(</span><span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">structures</span> <span class="o">=</span> <span class="n">structures</span>
@@ -403,7 +403,7 @@
 <a class="viewcode-back" href="../../../../../pymatgen.analysis.diffusion.aimd.van_hove.html#pymatgen.analysis.diffusion.aimd.van_hove.EvolutionAnalyzer.get_pairs">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_pairs</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Get all element pairs in a structure.</span>
 
 <span class="sd">        Args:</span>
@@ -411,7 +411,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list of tuples</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">specie_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">types_of_specie</span><span class="p">]</span>
         <span class="n">pairs</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations_with_replacement</span><span class="p">(</span><span class="n">specie_list</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
@@ -422,18 +422,18 @@
 <a class="viewcode-back" href="../../../../../pymatgen.analysis.diffusion.aimd.van_hove.html#pymatgen.analysis.diffusion.aimd.van_hove.EvolutionAnalyzer.rdf">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">rdf</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">pair</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">ngrid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">101</span><span class="p">,</span> <span class="n">rmax</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Process rdf from a given structure and pair.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            structure (Structure): input structure.</span>
-<span class="sd">            pair (str tuple): e.g. (&quot;Na&quot;, &quot;Na&quot;).</span>
+<span class="sd">            pair (str tuple): e.g. ("Na", "Na").</span>
 <span class="sd">            ngrid (int): Number of radial grid points.</span>
 <span class="sd">            rmax (float): Maximum of radial grid (the minimum is always zero).</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            rdf (np.array)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">r</span> <span class="o">=</span> <span class="n">RadialDistributionFunction</span><span class="o">.</span><span class="n">from_species</span><span class="p">(</span>
             <span class="p">[</span><span class="n">structure</span><span class="p">],</span>
             <span class="n">ngrid</span><span class="o">=</span><span class="n">ngrid</span><span class="p">,</span>
@@ -454,9 +454,9 @@
         <span class="n">specie</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">ngrid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">101</span><span class="p">,</span>
         <span class="n">window</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span>
+        <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"c"</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Get atomic distribution for a given specie.</span>
 
 <span class="sd">        Args:</span>
@@ -465,17 +465,17 @@
 <span class="sd">            ngrid (int): Number of radial grid points.</span>
 <span class="sd">            window (float): number of atoms will be counted within the range</span>
 <span class="sd">                (i-window, i+window), unit is angstrom.</span>
-<span class="sd">            direction (str): Choose from &quot;a&quot;, &quot;b&quot; and &quot;c&quot;. Default is &quot;c&quot;.</span>
+<span class="sd">            direction (str): Choose from "a", "b" and "c". Default is "c".</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            density (np.array): atomic concentration along one direction.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">]:</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">direction</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">]:</span>
             <span class="n">latt_len</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">lattice</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span>
-            <span class="n">ind</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="n">window</span> <span class="o">&lt;=</span> <span class="n">latt_len</span><span class="p">,</span> <span class="s2">&quot;Window range exceeds valid bounds!&quot;</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">direction</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">window</span> <span class="o">&lt;=</span> <span class="n">latt_len</span><span class="p">,</span> <span class="s2">"Window range exceeds valid bounds!"</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Choose from a, b and c!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Choose from a, b and c!"</span><span class="p">)</span>
 
         <span class="n">atom_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">site</span> <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">structure</span><span class="o">.</span><span class="n">sites</span> <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">species_string</span> <span class="o">==</span> <span class="n">specie</span><span class="p">]</span>
         <span class="n">atom_total</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="n">specie</span><span class="p">]</span>
@@ -495,7 +495,7 @@
 <div class="viewcode-block" id="EvolutionAnalyzer.get_df">
 <a class="viewcode-back" href="../../../../../pymatgen.analysis.diffusion.aimd.van_hove.html#pymatgen.analysis.diffusion.aimd.van_hove.EvolutionAnalyzer.get_df">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_df</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">save_csv</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Get the data frame for a given pair. This step would be very slow if</span>
 <span class="sd">        there are hundreds or more structures to parse.</span>
 
@@ -506,21 +506,21 @@
 <span class="sd">                required). Extra parameters can be parsed using kwargs.</span>
 <span class="sd">                e.g. To get rdf dataframe:</span>
 <span class="sd">                    df = EvolutionAnalyzer.get_df(</span>
-<span class="sd">                        func=EvolutionAnalyzer.rdf, pair=(&quot;Na&quot;, &quot;Na&quot;))</span>
+<span class="sd">                        func=EvolutionAnalyzer.rdf, pair=("Na", "Na"))</span>
 <span class="sd">                e.g. To get atomic distribution:</span>
 <span class="sd">                    df = EvolutionAnalyzer.get_df(</span>
-<span class="sd">                        func=EvolutionAnalyzer.atom_dist, specie=&quot;Na&quot;)</span>
+<span class="sd">                        func=EvolutionAnalyzer.atom_dist, specie="Na")</span>
 <span class="sd">            save_csv (str): save pandas DataFrame to csv.</span>
 <span class="sd">            **kwargs: Pass-through to func.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            pandas.DataFrame object: index is the radial distance in Angstrom,</span>
 <span class="sd">                and column is the time step in ps.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">prop_table</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">ngrid</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ngrid&quot;</span><span class="p">,</span> <span class="mi">101</span><span class="p">)</span>
+        <span class="n">ngrid</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"ngrid"</span><span class="p">,</span> <span class="mi">101</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">func</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">rdf</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;rmax&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmax</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">"rmax"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rmax</span>
 
         <span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="p">:</span>
             <span class="n">prop_table</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
@@ -539,7 +539,7 @@
 <a class="viewcode-back" href="../../../../../pymatgen.analysis.diffusion.aimd.van_hove.html#pymatgen.analysis.diffusion.aimd.van_hove.EvolutionAnalyzer.get_min_dist">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_min_dist</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">tol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Get the shortest pair distance from the given DataFrame.</span>
 
 <span class="sd">        Args:</span>
@@ -549,13 +549,13 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            The shortest pair distance throughout the table.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="c1"># TODO: Add unittest</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
-            <span class="n">min_dist</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">min_dist</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">"index"</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">min_dist</span> <span class="o">&gt;</span> <span class="n">tol</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Getting min dist failed.&quot;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"Getting min dist failed."</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="EvolutionAnalyzer.plot_evolution_from_data">
@@ -567,7 +567,7 @@
         <span class="n">cb_label</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">cmap</span><span class="p">:</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Colormap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">plasma</span><span class="p">,</span>  <span class="c1"># type: ignore[attr-defined] # pylint: disable=E1101</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Plot the evolution with time for a given DataFrame. It can be RDF,</span>
 <span class="sd">        atomic distribution or other characterization data we might</span>
 <span class="sd">        implement in the future.</span>
@@ -581,16 +581,16 @@
 <span class="sd">                cmocean.cm.thermal is recommended</span>
 <span class="sd">        Returns:</span>
 <span class="sd">            matplotlib.axes._subplots.AxesSubplot object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">&quot;white&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">sns</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">"white"</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.linewidth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.5</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sans-serif&quot;</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;xtick.labelsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;ytick.labelsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;xtick.major.pad&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">"axes.linewidth"</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.5</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">"font.family"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"sans-serif"</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">"xtick.labelsize"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">"ytick.labelsize"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">"xtick.major.pad"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
 
-        <span class="n">_fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+        <span class="n">_fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">facecolor</span><span class="o">=</span><span class="s2">"w"</span><span class="p">)</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span>
             <span class="n">df</span><span class="p">,</span>
             <span class="n">linewidths</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -604,12 +604,12 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">collections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">colorbar</span><span class="o">.</span><span class="n">set_label</span><span class="p">(</span><span class="n">cb_label</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span> <span class="k">if</span> <span class="n">cb_label</span> <span class="ow">and</span> <span class="n">ax</span><span class="o">.</span><span class="n">collections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">colorbar</span> <span class="k">else</span> <span class="kc">None</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">)</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">x_label</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span> <span class="k">if</span> <span class="n">x_label</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Time (ps)&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Time (ps)"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
 
-        <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="s2">"horizontal"</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ax</span></div>
 
@@ -622,11 +622,11 @@
         <span class="n">cmap</span><span class="p">:</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Colormap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">plasma</span><span class="p">,</span>  <span class="c1"># type: ignore[attr-defined] # pylint: disable=E1101</span>
         <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Plot the RDF evolution with time for a given pair.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            pair (str tuple): e.g. (&quot;Na&quot;, &quot;Na&quot;)</span>
+<span class="sd">            pair (str tuple): e.g. ("Na", "Na")</span>
 <span class="sd">            cmap (color map): the color map used in heat map.</span>
 <span class="sd">                cmocean.cm.thermal is recommended</span>
 <span class="sd">            df (DataFrame): external data, index is the radial distance in</span>
@@ -634,10 +634,10 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            matplotlib.axes._subplots.AxesSubplot object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">EvolutionAnalyzer</span><span class="o">.</span><span class="n">rdf</span><span class="p">,</span> <span class="n">pair</span><span class="o">=</span><span class="n">pair</span><span class="p">)</span>
-        <span class="n">x_label</span><span class="p">,</span> <span class="n">cb_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;$r$ (</span><span class="si">{</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">) ($</span><span class="se">\\</span><span class="s2">rm</span><span class="se">\\</span><span class="s2">AA$)&quot;</span><span class="p">,</span> <span class="s2">&quot;$g(r)$&quot;</span>
+        <span class="n">x_label</span><span class="p">,</span> <span class="n">cb_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"$r$ (</span><span class="si">{</span><span class="n">pair</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">-</span><span class="si">{</span><span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">) ($</span><span class="se">\\</span><span class="s2">rm</span><span class="se">\\</span><span class="s2">AA$)"</span><span class="p">,</span> <span class="s2">"$g(r)$"</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_evolution_from_data</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="n">x_label</span><span class="p">,</span> <span class="n">cb_label</span><span class="o">=</span><span class="n">cb_label</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span></div>
 
 
@@ -646,28 +646,28 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">plot_atomic_evolution</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">specie</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;c&quot;</span><span class="p">,</span>
+        <span class="n">direction</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"c"</span><span class="p">,</span>
         <span class="n">cmap</span><span class="p">:</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">Colormap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Blues</span><span class="p">,</span>  <span class="c1"># type: ignore[attr-defined] # pylint: disable=E1101</span>
         <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Plot the atomic distribution evolution with time for a given species.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            specie (str): species string for an element.</span>
-<span class="sd">            direction (str): Choose from &quot;a&quot;, &quot;b&quot;, &quot;c&quot;. Default to &quot;c&quot;.</span>
+<span class="sd">            direction (str): Choose from "a", "b", "c". Default to "c".</span>
 <span class="sd">            cmap (color map): the color map used in heat map.</span>
 <span class="sd">            df (DataFrame): external data, index is the atomic distance in</span>
 <span class="sd">                         Angstrom, and column is the time step in ps.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            matplotlib.axes._subplots.AxesSubplot object</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_df</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">EvolutionAnalyzer</span><span class="o">.</span><span class="n">atom_dist</span><span class="p">,</span> <span class="n">specie</span><span class="o">=</span><span class="n">specie</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="n">direction</span><span class="p">)</span>
         <span class="n">x_label</span><span class="p">,</span> <span class="n">cb_label</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Atomic distribution along </span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Probability&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">"Atomic distribution along </span><span class="si">{</span><span class="n">direction</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+            <span class="s2">"Probability"</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_evolution_from_data</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="n">x_label</span><span class="p">,</span> <span class="n">cb_label</span><span class="o">=</span><span class="n">cb_label</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span></div>
 </div>

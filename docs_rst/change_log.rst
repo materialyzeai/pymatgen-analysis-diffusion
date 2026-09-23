@@ -1,6 +1,14 @@
 Change Log
 ==========
 
+v2026.9.23
+----------
+* Breaking: requires pymatgen>=2026.5.4 and Python>=3.11. Compatibility fixes for pymatgen 2026.5 (#455).
+* DiffusionAnalyzer: FFT-based windowed MSD, blocked over ions, for major speed and memory gains;
+  remove duplicate MSD computation; fix c_ranges index accumulation bug (#452, @mkphuthi).
+* Fix bug in DistinctPathFinder; add unit test.
+* Fix int usage.
+
 v2025.11.14
 -----------
 * Bug fix for distance determination for same sites. Use same tolerance as symprec.

@@ -5,12 +5,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Change Log &#8212; pymatgen-diffusion 2025.10.7 documentation</title>
+    <title>Change Log &#8212; pymatgen-diffusion 2026.9.24 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/flasky.css?v=8156beb0" />
-    <script src="_static/documentation_options.js?v=708802d9"></script>
-    <script src="_static/doctools.js?v=9bcbadda"></script>
-    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/documentation_options.js?v=3e3b5833"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pymatgen-diffusion 2025.10.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymatgen-diffusion 2026.9.24 documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Change Log</a></li> 
       </ul>
     </div>  
@@ -47,6 +47,16 @@
             
   <section id="change-log">
 <h1>Change Log<a class="headerlink" href="#change-log" title="Link to this heading">¶</a></h1>
+<section id="v2026-9-23">
+<h2>v2026.9.23<a class="headerlink" href="#v2026-9-23" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Breaking: requires pymatgen&gt;=2026.5.4 and Python&gt;=3.11. Compatibility fixes for pymatgen 2026.5 (#455).</p></li>
+<li><p>DiffusionAnalyzer: FFT-based windowed MSD, blocked over ions, for major speed and memory gains;
+remove duplicate MSD computation; fix c_ranges index accumulation bug (#452, &#64;mkphuthi).</p></li>
+<li><p>Fix bug in DistinctPathFinder; add unit test.</p></li>
+<li><p>Fix int usage.</p></li>
+</ul>
+</section>
 <section id="v2025-11-14">
 <h2>v2025.11.14<a class="headerlink" href="#v2025-11-14" title="Link to this heading">¶</a></h2>
 <ul class="simple">
@@ -124,6 +134,7 @@ imported via <cite>pymatgen.analysis.diffusion</cite> instead <cite>pymatgen_dif
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Change Log</a><ul>
+<li><a class="reference internal" href="#v2026-9-23">v2026.9.23</a></li>
 <li><a class="reference internal" href="#v2025-11-14">v2025.11.14</a></li>
 <li><a class="reference internal" href="#v2024-6-25">v2024.6.25</a></li>
 <li><a class="reference internal" href="#v2023-8-15">v2023.8.15</a></li>

@@ -4,12 +4,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pymatgen.analysis.diffusion.analyzer &#8212; pymatgen-diffusion 2025.10.7 documentation</title>
+    <title>pymatgen.analysis.diffusion.analyzer &#8212; pymatgen-diffusion 2026.9.24 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/flasky.css?v=8156beb0" />
-    <script src="../../../../_static/documentation_options.js?v=708802d9"></script>
-    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/documentation_options.js?v=3e3b5833"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
 
@@ -34,7 +34,7 @@
         <li class="right" >
           <a href="../../../../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymatgen-diffusion 2025.10.7 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymatgen-diffusion 2026.9.24 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">pymatgen.analysis.diffusion.analyzer</a></li> 
       </ul>
@@ -46,7 +46,7 @@
           <div class="body" role="main">
             
   <h1>Source code for pymatgen.analysis.diffusion.analyzer</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;A module to perform diffusion analyses.</span>
+<span></span><span class="sd">"""A module to perform diffusion analyses.</span>
 
 <span class="sd">For example, calculating diffusivity from mean square displacements etc.). If you use this module, please consider</span>
 <span class="sd">citing the following papers::</span>
@@ -60,7 +60,7 @@
 <span class="sd">    Mo, Y., Ong, S. P., &amp; Ceder, G. (2012). First Principles Study of the</span>
 <span class="sd">    Li10GeP2S12 Lithium Super Ionic Conductor Material. Chemistry of Materials,</span>
 <span class="sd">    24(1), 15-17. doi:10.1021/cm203303y</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
@@ -78,6 +78,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.io.vasp.outputs</span><span class="w"> </span><span class="kn">import</span> <span class="n">Vasprun</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.util.coord</span><span class="w"> </span><span class="kn">import</span> <span class="n">pbc_diff</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.util.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">pretty_plot</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.fft</span><span class="w"> </span><span class="kn">import</span> <span class="n">irfft</span><span class="p">,</span> <span class="n">next_fast_len</span><span class="p">,</span> <span class="n">rfft</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">curve_fit</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -86,18 +87,83 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.axes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Axes</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pymatgen.util.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">PathLike</span><span class="p">,</span> <span class="n">SpeciesLike</span>
 
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Will Richards, Shyue Ping Ong&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.2&quot;</span>
-<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Will Richards&quot;</span>
-<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;wrichard@mit.edu&quot;</span>
-<span class="n">__status__</span> <span class="o">=</span> <span class="s2">&quot;Beta&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;5/2/13&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">"Will Richards, Shyue Ping Ong"</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">"0.2"</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">"Will Richards"</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">"wrichard@mit.edu"</span>
+<span class="n">__status__</span> <span class="o">=</span> <span class="s2">"Beta"</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">"5/2/13"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_msd_from_positions_fft</span><span class="p">(</span>
+    <span class="n">pos</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">block_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">max_block_bytes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256_000_000</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Multi-time-origin MSD via FFT autocorrelation (Wiener-Khinchin theorem),</span>
+<span class="sd">    batched over a leading "particle" axis and a trailing coordinate axis.</span>
+
+<span class="sd">    For each particle p, dimension d, and lag m:</span>
+
+<span class="sd">        MSD[p, m, d] = 1/(N-m) * sum_{t=0}^{N-m-1} (pos[p, t+m, d] - pos[p, t, d])^2</span>
+
+<span class="sd">    i.e. the displacement over lag m, averaged over every time origin t.</span>
+<span class="sd">    This is the definition used by the windowed ("max") MSD smoothing mode,</span>
+<span class="sd">    and (applied to a summed pseudo-trajectory of the diffusing species) by</span>
+<span class="sd">    the charge MSD. Using the standard S1 - 2*S2 decomposition (S1 via</span>
+<span class="sd">    prefix sums, S2 via FFT autocorrelation) computes MSD at every lag</span>
+<span class="sd">    0..N-1 for all particles/dimensions in a couple of vectorized calls,</span>
+<span class="sd">    instead of the O(n_lags * n_particles * N) cost of explicitly</span>
+<span class="sd">    subtracting shifted copies of the trajectory for each lag.</span>
+
+<span class="sd">    The transform is done in blocks of particles so the transient memory is</span>
+<span class="sd">    bounded by the block rather than the whole input, uses the real-input FFT</span>
+<span class="sd">    (the positions are real), and zero-pads to the nearest fast FFT length at</span>
+<span class="sd">    or above 2N rather than exactly 2N (which can have large prime factors</span>
+<span class="sd">    and be several times slower).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pos: Array of shape (n_particles, N, dim).</span>
+<span class="sd">        block_size: Number of particles transformed at once. Default None</span>
+<span class="sd">            picks the largest block whose transient arrays fit in</span>
+<span class="sd">            ``max_block_bytes``.</span>
+<span class="sd">        max_block_bytes: Approximate transient memory budget per block, used</span>
+<span class="sd">            only when block_size is None. The output array (same shape as</span>
+<span class="sd">            ``pos``) is allocated in addition to this.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Array of shape (n_particles, N, dim) of per-dimension MSD at each lag.</span>
+<span class="sd">    """</span>
+    <span class="n">n_particles</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">n_fft</span> <span class="o">=</span> <span class="n">next_fast_len</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">n</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">m</span><span class="p">)[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">block_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Per particle: the half-spectrum (complex128, n_fft/2+1) plus the</span>
+        <span class="c1"># padded inverse transform and ~4 length-N float64 work arrays.</span>
+        <span class="n">per_particle_bytes</span> <span class="o">=</span> <span class="n">dim</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_fft</span> <span class="o">+</span> <span class="n">n_fft</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">block_size</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">n_particles</span><span class="p">,</span> <span class="n">max_block_bytes</span> <span class="o">//</span> <span class="n">per_particle_bytes</span><span class="p">))</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">n_particles</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">dim</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_particles</span><span class="p">,</span> <span class="n">block_size</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="n">start</span> <span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="n">block_size</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">rfft</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n_fft</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">*=</span> <span class="n">np</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">corr</span> <span class="o">=</span> <span class="n">irfft</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">n_fft</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="p">:</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">del</span> <span class="n">f</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">corr</span> <span class="o">/</span> <span class="n">norm</span>
+
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dim</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="n">prefix</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:]</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="p">(</span><span class="n">prefix</span><span class="p">[:,</span> <span class="n">n</span> <span class="o">-</span> <span class="n">m</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="p">(</span><span class="n">total</span> <span class="o">-</span> <span class="n">prefix</span><span class="p">[:,</span> <span class="n">m</span><span class="p">,</span> <span class="p">:]))</span> <span class="o">/</span> <span class="n">norm</span>
+
+        <span class="n">out</span><span class="p">[</span><span class="n">start</span> <span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="n">block_size</span><span class="p">]</span> <span class="o">=</span> <span class="n">s1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">s2</span>
+    <span class="k">return</span> <span class="n">out</span>
 
 
 <div class="viewcode-block" id="DiffusionAnalyzer">
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.DiffusionAnalyzer">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">DiffusionAnalyzer</span><span class="p">(</span><span class="n">MSONable</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Class for performing diffusion analysis.</span>
 
 <span class="sd">    .. attribute: diffusivity</span>
@@ -182,7 +248,7 @@
 
 <span class="sd">    .. attribute: haven_ratio</span>
 <span class="sd">        Haven ratio defined as diffusivity / chg_diffusivity.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -192,7 +258,7 @@
         <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">time_step</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">step_skip</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">smoothed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span>
+        <span class="n">smoothed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"max"</span><span class="p">,</span>
         <span class="n">min_obs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
         <span class="n">avg_nsteps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
         <span class="n">lattices</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -200,7 +266,7 @@
         <span class="n">c_range_include_edge</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">structures</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Structure</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        This constructor is meant to be used with pre-processed data.</span>
 <span class="sd">        Other convenient constructors are provided as class methods (see</span>
 <span class="sd">        from_vaspruns and from_files).</span>
@@ -221,7 +287,7 @@
 <span class="sd">            displacements (array): Numpy array of with shape [site,</span>
 <span class="sd">                time step, axis]</span>
 <span class="sd">            specie (Element/Species): Species to calculate diffusivity for as a</span>
-<span class="sd">                String. E.g., &quot;Li&quot;.</span>
+<span class="sd">                String. E.g., "Li".</span>
 <span class="sd">            temperature (float): Temperature of the diffusion run in Kelvin.</span>
 <span class="sd">            time_step (int): Time step between measurements.</span>
 <span class="sd">            step_skip (int): Sampling frequency of the displacements (</span>
@@ -230,29 +296,29 @@
 <span class="sd">            smoothed (str): Whether to smooth the MSD, and what mode to smooth.</span>
 <span class="sd">                Supported modes are:</span>
 
-<span class="sd">                i. &quot;max&quot;, which tries to use the maximum #</span>
+<span class="sd">                i. "max", which tries to use the maximum #</span>
 <span class="sd">                   of data points for each time origin, subject to a</span>
 <span class="sd">                   minimum # of observations given by min_obs, and then</span>
 <span class="sd">                   weights the observations based on the variance</span>
 <span class="sd">                   accordingly. This is the default.</span>
-<span class="sd">                ii. &quot;constant&quot;, in which each timestep is averaged over</span>
+<span class="sd">                ii. "constant", in which each timestep is averaged over</span>
 <span class="sd">                    the number of time_steps given by min_steps.</span>
 <span class="sd">                iii. None / False / any other false-like quantity. No</span>
 <span class="sd">                   smoothing.</span>
 
-<span class="sd">            min_obs (int): Used with smoothed=&quot;max&quot;. Minimum number of</span>
+<span class="sd">            min_obs (int): Used with smoothed="max". Minimum number of</span>
 <span class="sd">                observations to have before including in the MSD vs dt</span>
 <span class="sd">                calculation. E.g. If a structure has 10 diffusing atoms,</span>
 <span class="sd">                and min_obs = 30, the MSD vs dt will be</span>
 <span class="sd">                calculated up to dt = total_run_time / 3, so that each</span>
 <span class="sd">                diffusing atom is measured at least 3 uncorrelated times.</span>
-<span class="sd">                Only applies in smoothed=&quot;max&quot;.</span>
-<span class="sd">            avg_nsteps (int): Used with smoothed=&quot;constant&quot;. Determines the</span>
+<span class="sd">                Only applies in smoothed="max".</span>
+<span class="sd">            avg_nsteps (int): Used with smoothed="constant". Determines the</span>
 <span class="sd">                number of time steps to average over to get the msd for each</span>
 <span class="sd">                timestep. Default of 1000 is usually pretty good.</span>
 <span class="sd">            lattices (array): Numpy array of lattice matrix of every step. Used</span>
 <span class="sd">                for NPT-AIMD. For NVT-AIMD, the lattice at each time step is</span>
-<span class="sd">                set to the lattice in the &quot;structure&quot; argument.</span>
+<span class="sd">                set to the lattice in the "structure" argument.</span>
 <span class="sd">            c_ranges (list): A list of fractional ranges of z-axis to define</span>
 <span class="sd">                regions and calculate regional MSD and regional diffusivity.</span>
 <span class="sd">                If the start and end positions of a diffusing specie between</span>
@@ -266,7 +332,7 @@
 <span class="sd">                calculation of regional MSD and regional diffusivity. These structures</span>
 <span class="sd">                should be the same as those used to construct the diffusion analyzer.</span>
 <span class="sd">                Default to None.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">disp</span> <span class="o">=</span> <span class="n">displacements</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">specie</span> <span class="o">=</span> <span class="n">specie</span>
@@ -304,16 +370,16 @@
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">smoothed</span><span class="p">:</span>
                 <span class="n">timesteps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">smoothed</span> <span class="o">==</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">smoothed</span> <span class="o">==</span> <span class="s2">"constant"</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">nsteps</span> <span class="o">&lt;=</span> <span class="n">avg_nsteps</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not enough data to calculate diffusivity&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Not enough data to calculate diffusivity"</span><span class="p">)</span>
                 <span class="n">timesteps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nsteps</span> <span class="o">-</span> <span class="n">avg_nsteps</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># limit the number of sampled timesteps to 200</span>
                 <span class="n">min_dt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">1000</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">step_skip</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">))</span>
                 <span class="n">max_dt</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">*</span> <span class="n">nsteps</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_obs</span><span class="p">,</span> <span class="n">nsteps</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">min_dt</span> <span class="o">&gt;=</span> <span class="n">max_dt</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not enough data to calculate diffusivity&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Not enough data to calculate diffusivity"</span><span class="p">)</span>
                 <span class="n">timesteps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">min_dt</span><span class="p">,</span> <span class="n">max_dt</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">max_dt</span> <span class="o">-</span> <span class="n">min_dt</span><span class="p">)</span> <span class="o">/</span> <span class="mi">200</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
 
             <span class="n">dt</span> <span class="o">=</span> <span class="n">timesteps</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_skip</span>
@@ -329,46 +395,59 @@
             <span class="c1"># calculate regional msd and number of diffusing specie in those regions</span>
             <span class="n">msd_c_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
             <span class="n">msd_c_range_components</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="o">*</span><span class="n">dt</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-            <span class="n">indices_c_range</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># list of per-timestep lists of ion indices found within c_ranges</span>
+            <span class="n">indices_c_range</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># For the windowed (all-time-origins-averaged) smoothing mode used</span>
+            <span class="c1"># by everything other than smoothed=False/"constant", MSD at every</span>
+            <span class="c1"># lag can be computed in one vectorized pass via FFT autocorrelation</span>
+            <span class="c1"># instead of looping over lags and re-slicing dc each time.</span>
+            <span class="n">fast_windowed_msd</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">smoothed</span><span class="p">)</span> <span class="ow">and</span> <span class="n">smoothed</span> <span class="o">!=</span> <span class="s2">"constant"</span>
+            <span class="k">if</span> <span class="n">fast_windowed_msd</span><span class="p">:</span>
+                <span class="n">agg_disp</span> <span class="o">=</span> <span class="n">dc</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">per_dim_msd_full</span> <span class="o">=</span> <span class="n">_msd_from_positions_fft</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">dc</span><span class="p">,</span> <span class="n">agg_disp</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+                <span class="n">ion_msd_full</span> <span class="o">=</span> <span class="n">per_dim_msd_full</span><span class="p">[:</span><span class="n">_nions</span><span class="p">]</span>
+                <span class="n">mscd_full</span> <span class="o">=</span> <span class="n">per_dim_msd_full</span><span class="p">[</span><span class="n">_nions</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timesteps</span><span class="p">):</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">smoothed</span><span class="p">:</span>
-                    <span class="n">dx</span> <span class="o">=</span> <span class="n">dc</span><span class="p">[:,</span> <span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
-                    <span class="n">dcomponents</span> <span class="o">=</span> <span class="n">dc</span><span class="p">[:,</span> <span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
-                <span class="k">elif</span> <span class="n">smoothed</span> <span class="o">==</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span>
-                    <span class="n">dx</span> <span class="o">=</span> <span class="n">dc</span><span class="p">[:,</span> <span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">avg_nsteps</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">dc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">avg_nsteps</span><span class="p">,</span> <span class="p">:]</span>
-                    <span class="n">dcomponents</span> <span class="o">=</span> <span class="n">dc</span><span class="p">[:,</span> <span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">avg_nsteps</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">dc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">avg_nsteps</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="k">if</span> <span class="n">fast_windowed_msd</span><span class="p">:</span>
+                    <span class="n">per_ion_dim</span> <span class="o">=</span> <span class="n">ion_msd_full</span><span class="p">[:,</span> <span class="n">n</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">mscd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">mscd_full</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">dx</span> <span class="o">=</span> <span class="n">dc</span><span class="p">[:,</span> <span class="n">n</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">dc</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span>
-                    <span class="n">dcomponents</span> <span class="o">=</span> <span class="n">dc</span><span class="p">[:,</span> <span class="n">n</span><span class="p">:,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">dc</span><span class="p">[:,</span> <span class="p">:</span><span class="o">-</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="c1"># smoothed == "constant" when fast_windowed_msd is False and smoothed is truthy</span>
+                    <span class="n">dx</span> <span class="o">=</span> <span class="n">dc</span><span class="p">[:,</span> <span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">smoothed</span> <span class="k">else</span> <span class="n">dc</span><span class="p">[:,</span> <span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">avg_nsteps</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">dc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="n">avg_nsteps</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">per_ion_dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">dx</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">sq_chg_disp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dx</span><span class="p">[</span><span class="n">indices</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+                    <span class="n">mscd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sq_chg_disp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
 
                 <span class="c1"># Get msd</span>
-                <span class="n">sq_disp</span> <span class="o">=</span> <span class="n">dx</span><span class="o">**</span><span class="mi">2</span>
-                <span class="n">sq_disp_ions</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sq_disp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">sq_disp_ions</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">per_ion_dim</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
                 <span class="n">msd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">sq_disp_ions</span><span class="p">[:,</span> <span class="n">i</span><span class="p">][</span><span class="n">indices</span><span class="p">])</span>
-                <span class="n">msd_components</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">dcomponents</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">msd_components</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">per_ion_dim</span><span class="p">[</span><span class="n">indices</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
                 <span class="c1"># Get regional msd</span>
                 <span class="k">if</span> <span class="n">c_ranges</span> <span class="ow">and</span> <span class="n">structures</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">c_range_include_edge</span><span class="p">:</span>
-                        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+                        <span class="n">indices_c_range_i</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">index</span>
+                            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span>
                             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
                                 <span class="n">lower</span> <span class="o">&lt;</span> <span class="n">structures</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">c</span> <span class="o">&lt;</span> <span class="n">upper</span> <span class="ow">and</span> <span class="n">lower</span> <span class="o">&lt;</span> <span class="n">structures</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">c</span> <span class="o">&lt;</span> <span class="n">upper</span>
                                 <span class="k">for</span> <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span> <span class="ow">in</span> <span class="n">c_ranges</span>
-                            <span class="p">):</span>
-                                <span class="n">indices_c_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="p">]</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+                        <span class="n">indices_c_range_i</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">index</span>
+                            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span>
                             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
                                 <span class="n">lower</span> <span class="o">&lt;=</span> <span class="n">structures</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">c</span> <span class="o">&lt;=</span> <span class="n">upper</span> <span class="ow">or</span> <span class="n">lower</span> <span class="o">&lt;=</span> <span class="n">structures</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">c</span> <span class="o">&lt;=</span> <span class="n">upper</span>
                                 <span class="k">for</span> <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span> <span class="ow">in</span> <span class="n">c_ranges</span>
-                            <span class="p">):</span>
-                                <span class="n">indices_c_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-                    <span class="n">msd_c_range</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">sq_disp_ions</span><span class="p">[:,</span> <span class="n">i</span><span class="p">][</span><span class="n">indices_c_range</span><span class="p">])</span>
-                    <span class="n">msd_c_range_components</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">dcomponents</span><span class="p">[</span><span class="n">indices_c_range</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-
-                <span class="c1"># Get mscd</span>
-                <span class="n">sq_chg_disp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dx</span><span class="p">[</span><span class="n">indices</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-                <span class="n">mscd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sq_chg_disp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="p">]</span>
+                    <span class="n">indices_c_range</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indices_c_range_i</span><span class="p">)</span>
+                    <span class="n">msd_c_range</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">sq_disp_ions</span><span class="p">[:,</span> <span class="n">i</span><span class="p">][</span><span class="n">indices_c_range_i</span><span class="p">])</span>
+                    <span class="n">msd_c_range_components</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">per_ion_dim</span><span class="p">[</span><span class="n">indices_c_range_i</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
             <span class="n">conv_factor</span> <span class="o">=</span> <span class="n">get_conversion_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">specie</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity_std_dev</span> <span class="o">=</span> <span class="n">get_diffusivity_from_msd</span><span class="p">(</span><span class="n">msd</span><span class="p">,</span> <span class="n">dt</span><span class="p">,</span> <span class="n">smoothed</span><span class="p">)</span>
@@ -439,10 +518,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_drift_corrected_structures</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Returns an iterator for the drift-corrected structures. Use of</span>
 <span class="sd">        iterator is to reduce memory usage as # of structures in MD can be</span>
-<span class="sd">        huge. You don&#39;t often need all the structures all at once.</span>
+<span class="sd">        huge. You don't often need all the structures all at once.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            start(int): Applies a start to the iterator.</span>
@@ -450,7 +529,7 @@
 <span class="sd">            step (int): Applies a step to the iterator.</span>
 <span class="sd">                Faster than applying it after generation, as it reduces the</span>
 <span class="sd">                number of structures created.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">cart_coords</span><span class="p">)</span>
         <span class="n">species</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">species_and_occu</span>
         <span class="n">lattices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattices</span>
@@ -469,7 +548,7 @@
 <div class="viewcode-block" id="DiffusionAnalyzer.get_summary_dict">
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.DiffusionAnalyzer.get_summary_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_summary_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_msd_t</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">include_mscd_t</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Provides a summary of diffusion information.</span>
 
 <span class="sd">        Args:</span>
@@ -480,43 +559,43 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            (dict) of diffusion and conductivity data.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;D&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity</span><span class="p">,</span>
-            <span class="s2">&quot;D_sigma&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity_std_dev</span><span class="p">,</span>
-            <span class="s2">&quot;D_charge&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chg_diffusivity</span><span class="p">,</span>
-            <span class="s2">&quot;D_charge_sigma&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chg_diffusivity_std_dev</span><span class="p">,</span>
-            <span class="s2">&quot;S&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conductivity</span><span class="p">,</span>
-            <span class="s2">&quot;S_sigma&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conductivity_std_dev</span><span class="p">,</span>
-            <span class="s2">&quot;S_charge&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chg_conductivity</span><span class="p">,</span>
-            <span class="s2">&quot;D_components&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity_components</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
-            <span class="s2">&quot;S_components&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conductivity_components</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
-            <span class="s2">&quot;D_components_sigma&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity_components_std_dev</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
-            <span class="s2">&quot;S_components_sigma&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conductivity_components_std_dev</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
-            <span class="s2">&quot;specie&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">specie</span><span class="p">),</span>
-            <span class="s2">&quot;step_skip&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_skip</span><span class="p">,</span>
-            <span class="s2">&quot;time_step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>
-            <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
-            <span class="s2">&quot;max_framework_displacement&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_framework_displacement</span><span class="p">,</span>
-            <span class="s2">&quot;Haven_ratio&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">haven_ratio</span><span class="p">,</span>
+            <span class="s2">"D"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity</span><span class="p">,</span>
+            <span class="s2">"D_sigma"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity_std_dev</span><span class="p">,</span>
+            <span class="s2">"D_charge"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chg_diffusivity</span><span class="p">,</span>
+            <span class="s2">"D_charge_sigma"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chg_diffusivity_std_dev</span><span class="p">,</span>
+            <span class="s2">"S"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conductivity</span><span class="p">,</span>
+            <span class="s2">"S_sigma"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conductivity_std_dev</span><span class="p">,</span>
+            <span class="s2">"S_charge"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chg_conductivity</span><span class="p">,</span>
+            <span class="s2">"D_components"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity_components</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">"S_components"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conductivity_components</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">"D_components_sigma"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">diffusivity_components_std_dev</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">"S_components_sigma"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">conductivity_components_std_dev</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">"specie"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">specie</span><span class="p">),</span>
+            <span class="s2">"step_skip"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_skip</span><span class="p">,</span>
+            <span class="s2">"time_step"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>
+            <span class="s2">"temperature"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+            <span class="s2">"max_framework_displacement"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_framework_displacement</span><span class="p">,</span>
+            <span class="s2">"Haven_ratio"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">haven_ratio</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">if</span> <span class="n">include_msd_t</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;msd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;msd_components&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd_components</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;dt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">"msd"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">"msd_components"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd_components</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">"dt"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">include_mscd_t</span><span class="p">:</span>
-            <span class="n">d</span><span class="p">[</span><span class="s2">&quot;mscd&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mscd</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">"mscd"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mscd</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">d</span></div>
 
 
 <div class="viewcode-block" id="DiffusionAnalyzer.get_framework_rms_plot">
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.DiffusionAnalyzer.get_framework_rms_plot">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_framework_rms_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">granularity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span> <span class="n">matching_s</span><span class="p">:</span> <span class="n">Structure</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Get the plot of rms framework displacement vs time. Useful for checking</span>
 <span class="sd">        for melting, especially if framework atoms can move via paddle-wheel</span>
 <span class="sd">        or similar mechanism (which would show up in max framework displacement</span>
-<span class="sd">        but doesn&#39;t constitute melting).</span>
+<span class="sd">        but doesn't constitute melting).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            granularity (int): Number of structures to match</span>
@@ -525,10 +604,10 @@
 <span class="sd">                a secondary mobile ion is present.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            The method doesn&#39;t apply to NPT-AIMD simulation analysis.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            The method doesn't apply to NPT-AIMD simulation analysis.</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lattices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Note the method doesn&#39;t apply to NPT-AIMD simulation analysis!&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">"Note the method doesn't apply to NPT-AIMD simulation analysis!"</span><span class="p">)</span>
 
         <span class="n">ax</span> <span class="o">=</span> <span class="n">pretty_plot</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
         <span class="n">step</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">corrected_displacements</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="p">(</span><span class="n">granularity</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
@@ -551,83 +630,83 @@
         <span class="n">max_dt</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">_rms</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_skip</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span>
         <span class="k">if</span> <span class="n">max_dt</span> <span class="o">&gt;</span> <span class="mi">100000</span><span class="p">:</span>
             <span class="n">plot_dt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_dt</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">_rms</span><span class="p">))</span>
-            <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;ps&quot;</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="s2">"ps"</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plot_dt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_dt</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">_rms</span><span class="p">))</span>
-            <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;fs&quot;</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="s2">"fs"</span>
         <span class="n">rms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">_rms</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="n">rms</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;RMS&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="n">rms</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;max&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;best&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Timestep (</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;normalized distance&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="n">rms</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">"RMS"</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="n">rms</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">"max"</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"best"</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Timestep (</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"normalized distance"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ax</span></div>
 
 
 <div class="viewcode-block" id="DiffusionAnalyzer.get_msd_plot">
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.DiffusionAnalyzer.get_msd_plot">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_msd_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;specie&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_msd_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"specie"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Get the plot of the smoothed msd vs time graph. Useful for</span>
 <span class="sd">        checking convergence. This can be written to an image file.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            mode (str): Determines type of msd plot. By &quot;species&quot;, &quot;sites&quot;,</span>
-<span class="sd">                or direction (default). If mode = &quot;mscd&quot;, the smoothed mscd vs.</span>
+<span class="sd">            mode (str): Determines type of msd plot. By "species", "sites",</span>
+<span class="sd">                or direction (default). If mode = "mscd", the smoothed mscd vs.</span>
 <span class="sd">                time will be plotted.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">pretty_plot</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
         <span class="n">plot_dt</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">100000</span><span class="p">:</span>
             <span class="n">plot_dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">/</span> <span class="mi">1000</span>
-            <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;ps&quot;</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="s2">"ps"</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plot_dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
-            <span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;fs&quot;</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="s2">"fs"</span>
 
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;species&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"species"</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">sp</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
                 <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">site</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">)</span> <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">specie</span> <span class="o">==</span> <span class="n">sp</span><span class="p">]</span>
                 <span class="n">sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sq_disp_ions</span><span class="p">[</span><span class="n">indices</span><span class="p">,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">sp</span><span class="p">))</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
-        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;sites&quot;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s2">"size"</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"sites"</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">site</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="p">):</span>
                 <span class="n">sd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sq_disp_ions</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
-                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="si">!s}</span><span class="s2"> - </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
-        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mscd&quot;</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mscd</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">&quot;Overall&quot;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">site</span><span class="o">.</span><span class="n">specie</span><span class="si">!s}</span><span class="s2"> - </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s2">"size"</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"mscd"</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mscd</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">"Overall"</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s2">"size"</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Handle default / invalid mode case</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd_components</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd_components</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;g&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd_components</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="s2">&quot;b&quot;</span><span class="p">)</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">&quot;Overall&quot;</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd</span><span class="p">,</span> <span class="s2">"k"</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd_components</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="s2">"r"</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd_components</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">"g"</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd_components</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="s2">"b"</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s2">"Overall"</span><span class="p">,</span> <span class="s2">"a"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="p">{</span><span class="s2">"size"</span><span class="p">:</span> <span class="mi">20</span><span class="p">})</span>
 
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Timestep (</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;mscd&quot;</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;MSCD ($</span><span class="se">\\</span><span class="s2">AA^2$)&quot;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Timestep (</span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"mscd"</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"MSCD ($</span><span class="se">\\</span><span class="s2">AA^2$)"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;MSD ($</span><span class="se">\\</span><span class="s2">AA^2$)&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"MSD ($</span><span class="se">\\</span><span class="s2">AA^2$)"</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ax</span></div>
 
 
 <div class="viewcode-block" id="DiffusionAnalyzer.plot_msd">
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.DiffusionAnalyzer.plot_msd">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">plot_msd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_msd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"default"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Plot the smoothed msd vs time graph. Useful for checking convergence.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            mode (str): Can be &quot;default&quot; (the default, shows only the MSD for</span>
-<span class="sd">                the diffusing specie, and its components), &quot;ions&quot; (individual</span>
-<span class="sd">                square displacements of all ions), &quot;species&quot; (mean square</span>
-<span class="sd">                displacement by specie), or &quot;mscd&quot; (overall mean square charge</span>
+<span class="sd">            mode (str): Can be "default" (the default, shows only the MSD for</span>
+<span class="sd">                the diffusing specie, and its components), "ions" (individual</span>
+<span class="sd">                square displacements of all ions), "species" (mean square</span>
+<span class="sd">                displacement by specie), or "mscd" (overall mean square charge</span>
 <span class="sd">                displacement for diffusing specie).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">get_msd_plot</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
 
@@ -635,7 +714,7 @@
 <div class="viewcode-block" id="DiffusionAnalyzer.export_msdt">
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.DiffusionAnalyzer.export_msdt">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">export_msdt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Writes MSD data to a csv file that can be easily plotted in other</span>
 <span class="sd">        software.</span>
 
@@ -643,17 +722,17 @@
 <span class="sd">            filename (str): Filename. Supported formats are csv and dat. If</span>
 <span class="sd">                the extension is csv, a csv file is written. Otherwise,</span>
 <span class="sd">                a dat format is assumed.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;csv&quot;</span> <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;dat&quot;</span>
-        <span class="n">delimiter</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span> <span class="k">if</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s2">&quot;csv&quot;</span> <span class="k">else</span> <span class="s2">&quot; &quot;</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s2">&quot;dat&quot;</span><span class="p">:</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# &quot;</span><span class="p">)</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot;MSD&quot;</span><span class="p">,</span> <span class="s2">&quot;MSD_a&quot;</span><span class="p">,</span> <span class="s2">&quot;MSD_b&quot;</span><span class="p">,</span> <span class="s2">&quot;MSD_c&quot;</span><span class="p">,</span> <span class="s2">&quot;MSCD&quot;</span><span class="p">]))</span>
-            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="sd">        """</span>
+        <span class="n">fmt</span> <span class="o">=</span> <span class="s2">"csv"</span> <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">".csv"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"dat"</span>
+        <span class="n">delimiter</span> <span class="o">=</span> <span class="s2">", "</span> <span class="k">if</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s2">"csv"</span> <span class="k">else</span> <span class="s2">" "</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s2">"dat"</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"# "</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">"t"</span><span class="p">,</span> <span class="s2">"MSD"</span><span class="p">,</span> <span class="s2">"MSD_a"</span><span class="p">,</span> <span class="s2">"MSD_b"</span><span class="p">,</span> <span class="s2">"MSD_c"</span><span class="p">,</span> <span class="s2">"MSCD"</span><span class="p">]))</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">dt</span><span class="p">,</span> <span class="n">msd</span><span class="p">,</span> <span class="n">msdc</span><span class="p">,</span> <span class="n">mscd</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msd_components</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mscd</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">delimiter</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="n">dt</span><span class="p">,</span> <span class="n">msd</span><span class="p">,</span> <span class="o">*</span><span class="nb">list</span><span class="p">(</span><span class="n">msdc</span><span class="p">),</span> <span class="n">mscd</span><span class="p">]]))</span>
-                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DiffusionAnalyzer.from_structures">
@@ -670,7 +749,7 @@
         <span class="n">initial_structure</span><span class="p">:</span> <span class="n">Structure</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DiffusionAnalyzer</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""</span>
 <span class="sd">        Convenient constructor that takes in a list of Structure objects to</span>
 <span class="sd">        perform diffusion analysis.</span>
 
@@ -679,7 +758,7 @@
 <span class="sd">                ordered in sequence of run). E.g., you may have performed</span>
 <span class="sd">                sequential VASP runs to obtain sufficient statistics.</span>
 <span class="sd">            specie (Element/Species): Species to calculate diffusivity for as a</span>
-<span class="sd">                String. E.g., &quot;Li&quot;.</span>
+<span class="sd">                String. E.g., "Li".</span>
 <span class="sd">            temperature (float): Temperature of the diffusion run in Kelvin.</span>
 <span class="sd">            time_step (int): Time step between measurements.</span>
 <span class="sd">            step_skip (int): Sampling frequency of the displacements (</span>
@@ -697,7 +776,7 @@
 <span class="sd">                are computed.</span>
 <span class="sd">            **kwargs: kwargs supported by the :class:`DiffusionAnalyzer`_.</span>
 <span class="sd">                Examples include smoothed, min_obs, avg_nsteps.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="n">_p</span><span class="p">,</span> <span class="n">_lattices</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
         <span class="n">structure</span> <span class="o">=</span> <span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">structures</span><span class="p">:</span>
@@ -747,7 +826,7 @@
         <span class="n">initial_structure</span><span class="p">:</span> <span class="n">Structure</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DiffusionAnalyzer</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""</span>
 <span class="sd">        Convenient constructor that takes in a list of Vasprun objects to</span>
 <span class="sd">        perform diffusion analysis.</span>
 
@@ -756,7 +835,7 @@
 <span class="sd">                sequence of MD simulation). E.g., you may have performed</span>
 <span class="sd">                sequential VASP runs to obtain sufficient statistics.</span>
 <span class="sd">            specie (Element/Species): Species to calculate diffusivity for as a</span>
-<span class="sd">                String. E.g., &quot;Li&quot;.</span>
+<span class="sd">                String. E.g., "Li".</span>
 <span class="sd">            initial_disp (np.ndarray): Sometimes, you need to iteratively</span>
 <span class="sd">                compute estimates of the diffusivity. This supplies an</span>
 <span class="sd">                initial displacement that will be added on to the initial</span>
@@ -769,25 +848,25 @@
 <span class="sd">                are computed.</span>
 <span class="sd">            **kwargs: kwargs supported by the :class:`DiffusionAnalyzer`_.</span>
 <span class="sd">                Examples include smoothed, min_obs, avg_nsteps.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">get_structures</span><span class="p">(</span><span class="n">vaspruns</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Vasprun</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">:</span>
             <span class="n">step_skip</span> <span class="o">=</span> <span class="n">vaspruns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ionic_step_skip</span> <span class="ow">or</span> <span class="mi">1</span>
             <span class="n">final_structure</span> <span class="o">=</span> <span class="n">vaspruns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">initial_structure</span>
-            <span class="n">temperature</span> <span class="o">=</span> <span class="n">vaspruns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;TEEND&quot;</span><span class="p">]</span>
-            <span class="n">time_step</span> <span class="o">=</span> <span class="n">vaspruns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;POTIM&quot;</span><span class="p">]</span>
+            <span class="n">temperature</span> <span class="o">=</span> <span class="n">vaspruns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">"TEEND"</span><span class="p">]</span>
+            <span class="n">time_step</span> <span class="o">=</span> <span class="n">vaspruns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">"POTIM"</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">vr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vaspruns</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">yield</span> <span class="n">step_skip</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">time_step</span>
                 <span class="c1"># check that the runs are continuous</span>
                 <span class="n">fdist</span> <span class="o">=</span> <span class="n">pbc_diff</span><span class="p">(</span><span class="n">vr</span><span class="o">.</span><span class="n">initial_structure</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">,</span> <span class="n">final_structure</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">fdist</span> <span class="o">&gt;</span> <span class="mf">0.001</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;initial and final structures do not match.&quot;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"initial and final structures do not match."</span><span class="p">)</span>
                 <span class="n">final_structure</span> <span class="o">=</span> <span class="n">vr</span><span class="o">.</span><span class="n">final_structure</span>
 
                 <span class="k">assert</span> <span class="p">(</span><span class="n">vr</span><span class="o">.</span><span class="n">ionic_step_skip</span> <span class="ow">or</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">step_skip</span>
                 <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">vr</span><span class="o">.</span><span class="n">ionic_steps</span><span class="p">:</span>
-                    <span class="k">yield</span> <span class="n">s</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">]</span>
+                    <span class="k">yield</span> <span class="n">s</span><span class="p">[</span><span class="s2">"structure"</span><span class="p">]</span>
 
         <span class="n">s</span> <span class="o">=</span> <span class="n">get_structures</span><span class="p">(</span><span class="n">vaspruns</span><span class="p">)</span>
         <span class="n">step_skip</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">time_step</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
@@ -817,7 +896,7 @@
         <span class="n">initial_structure</span><span class="p">:</span> <span class="n">Structure</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DiffusionAnalyzer</span><span class="p">:</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""</span>
 <span class="sd">        Convenient constructor that takes in a list of vasprun.xml paths to</span>
 <span class="sd">        perform diffusion analysis.</span>
 
@@ -826,9 +905,9 @@
 <span class="sd">                must be ordered in sequence of MD simulation). For example,</span>
 <span class="sd">                you may have done sequential VASP runs and they are in run1,</span>
 <span class="sd">                run2, run3, etc. You should then pass in</span>
-<span class="sd">                [&quot;run1/vasprun.xml&quot;, &quot;run2/vasprun.xml&quot;, ...].</span>
+<span class="sd">                ["run1/vasprun.xml", "run2/vasprun.xml", ...].</span>
 <span class="sd">            specie (Element/Species): Species to calculate diffusivity for as a</span>
-<span class="sd">                String. E.g., &quot;Li&quot;.</span>
+<span class="sd">                String. E.g., "Li".</span>
 <span class="sd">            step_skip (int): Sampling frequency of the displacements (</span>
 <span class="sd">                time_step is multiplied by this number to get the real time</span>
 <span class="sd">                between measurements)</span>
@@ -851,7 +930,7 @@
 <span class="sd">                are computed.</span>
 <span class="sd">            **kwargs: kwargs supported by the :class:`DiffusionAnalyzer`_.</span>
 <span class="sd">                Examples include smoothed, min_obs, avg_nsteps.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="n">ncores</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">filepaths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pool</span><span class="p">(</span><span class="n">ncores</span><span class="p">)</span> <span class="k">as</span> <span class="n">p</span><span class="p">:</span>
                 <span class="n">vaspruns</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">imap</span><span class="p">(</span><span class="n">_get_vasprun</span><span class="p">,</span> <span class="p">[(</span><span class="n">fp</span><span class="p">,</span> <span class="n">step_skip</span><span class="p">)</span> <span class="k">for</span> <span class="n">fp</span> <span class="ow">in</span> <span class="n">filepaths</span><span class="p">])</span>
@@ -883,20 +962,20 @@
 <div class="viewcode-block" id="DiffusionAnalyzer.as_dict">
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.DiffusionAnalyzer.as_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns: MSONable dict.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""Returns: MSONable dict."""</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s2">&quot;@module&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
-            <span class="s2">&quot;@class&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-            <span class="s2">&quot;structure&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span>
-            <span class="s2">&quot;displacements&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
-            <span class="s2">&quot;specie&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">specie</span><span class="p">,</span>
-            <span class="s2">&quot;temperature&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
-            <span class="s2">&quot;time_step&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>
-            <span class="s2">&quot;step_skip&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_skip</span><span class="p">,</span>
-            <span class="s2">&quot;min_obs&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_obs</span><span class="p">,</span>
-            <span class="s2">&quot;smoothed&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothed</span><span class="p">,</span>
-            <span class="s2">&quot;avg_nsteps&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">avg_nsteps</span><span class="p">,</span>
-            <span class="s2">&quot;lattices&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattices</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">"@module"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
+            <span class="s2">"@class"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="s2">"structure"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span>
+            <span class="s2">"displacements"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">disp</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
+            <span class="s2">"specie"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">specie</span><span class="p">,</span>
+            <span class="s2">"temperature"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span>
+            <span class="s2">"time_step"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="p">,</span>
+            <span class="s2">"step_skip"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">step_skip</span><span class="p">,</span>
+            <span class="s2">"min_obs"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_obs</span><span class="p">,</span>
+            <span class="s2">"smoothed"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">smoothed</span><span class="p">,</span>
+            <span class="s2">"avg_nsteps"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">avg_nsteps</span><span class="p">,</span>
+            <span class="s2">"lattices"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">lattices</span><span class="o">.</span><span class="n">tolist</span><span class="p">(),</span>
         <span class="p">}</span></div>
 
 
@@ -904,24 +983,24 @@
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.DiffusionAnalyzer.from_dict">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DiffusionAnalyzer</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">"""</span>
 <span class="sd">        Args:</span>
 <span class="sd">            d (dict): Dict representation.</span>
 
 <span class="sd">        Returns: DiffusionAnalyzer</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">])</span>
+<span class="sd">        """</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"structure"</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">structure</span><span class="p">,</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;displacements&quot;</span><span class="p">]),</span>
-            <span class="n">specie</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;specie&quot;</span><span class="p">],</span>
-            <span class="n">temperature</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;temperature&quot;</span><span class="p">],</span>
-            <span class="n">time_step</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;time_step&quot;</span><span class="p">],</span>
-            <span class="n">step_skip</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;step_skip&quot;</span><span class="p">],</span>
-            <span class="n">min_obs</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;min_obs&quot;</span><span class="p">],</span>
-            <span class="n">smoothed</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;smoothed&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">),</span>
-            <span class="n">avg_nsteps</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;avg_nsteps&quot;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>
-            <span class="n">lattices</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lattices&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;structure&quot;</span><span class="p">][</span><span class="s2">&quot;lattice&quot;</span><span class="p">][</span><span class="s2">&quot;matrix&quot;</span><span class="p">]])),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s2">"displacements"</span><span class="p">]),</span>
+            <span class="n">specie</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">"specie"</span><span class="p">],</span>
+            <span class="n">temperature</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">"temperature"</span><span class="p">],</span>
+            <span class="n">time_step</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">"time_step"</span><span class="p">],</span>
+            <span class="n">step_skip</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">"step_skip"</span><span class="p">],</span>
+            <span class="n">min_obs</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s2">"min_obs"</span><span class="p">],</span>
+            <span class="n">smoothed</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"smoothed"</span><span class="p">,</span> <span class="s2">"max"</span><span class="p">),</span>
+            <span class="n">avg_nsteps</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"avg_nsteps"</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>
+            <span class="n">lattices</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"lattices"</span><span class="p">,</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s2">"structure"</span><span class="p">][</span><span class="s2">"lattice"</span><span class="p">][</span><span class="s2">"matrix"</span><span class="p">]])),</span>
         <span class="p">)</span></div>
 </div>
 
@@ -930,7 +1009,7 @@
 <div class="viewcode-block" id="get_conversion_factor">
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.get_conversion_factor">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_conversion_factor</span><span class="p">(</span><span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span> <span class="n">species</span><span class="p">:</span> <span class="n">SpeciesLike</span><span class="p">,</span> <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Conversion factor to convert between cm^2/s diffusivity measurements and</span>
 <span class="sd">    mS/cm conductivity measurements based on number of atoms of diffusing</span>
 <span class="sd">    species. Note that the charge is based on the oxidation state of the</span>
@@ -945,9 +1024,9 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Conversion factor.</span>
 <span class="sd">        Conductivity (in mS/cm) = Conversion Factor * Diffusivity (in cm^2/s)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">df_sp</span> <span class="o">=</span> <span class="n">get_el_sp</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
-    <span class="n">z</span> <span class="o">=</span> <span class="n">df_sp</span><span class="o">.</span><span class="n">oxi_state</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">df_sp</span><span class="p">,</span> <span class="s2">&quot;oxi_state&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">df_sp</span><span class="o">.</span><span class="n">full_electronic_structure</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">df_sp</span><span class="o">.</span><span class="n">oxi_state</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">df_sp</span><span class="p">,</span> <span class="s2">"oxi_state"</span><span class="p">)</span> <span class="k">else</span> <span class="n">df_sp</span><span class="o">.</span><span class="n">full_electronic_structure</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
 
     <span class="n">n</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">composition</span><span class="p">[</span><span class="n">species</span><span class="p">]</span>
 
@@ -957,7 +1036,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_vasprun</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Vasprun</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal method to support multiprocessing.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Internal method to support multiprocessing."""</span>
     <span class="k">return</span> <span class="n">Vasprun</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ionic_step_skip</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">parse_dos</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">parse_eigen</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 
@@ -966,10 +1045,10 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">fit_arrhenius</span><span class="p">(</span>
     <span class="n">temps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">diffusivities</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;exp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"linear"</span><span class="p">,</span> <span class="s2">"exp"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"linear"</span><span class="p">,</span>
     <span class="n">diffusivity_errors</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns Ea, c, standard error of Ea from the Arrhenius fit.</span>
 <span class="sd">        D = c * exp(-Ea/kT).</span>
 
@@ -978,16 +1057,16 @@
 <span class="sd">        diffusivities ([float]): A sequence of diffusivities (e.g.,</span>
 <span class="sd">            from DiffusionAnalyzer.diffusivity). units: cm^2/s</span>
 <span class="sd">        mode (str): The fitting mode. Supported modes are:</span>
-<span class="sd">                i. &quot;linear&quot; (default), which fits ln(D) vs 1/T.</span>
-<span class="sd">                ii. &quot;exp&quot;, which fits D vs T.</span>
-<span class="sd">            Hint: Use &quot;exp&quot; with diffusivity errors if the errors are</span>
+<span class="sd">                i. "linear" (default), which fits ln(D) vs 1/T.</span>
+<span class="sd">                ii. "exp", which fits D vs T.</span>
+<span class="sd">            Hint: Use "exp" with diffusivity errors if the errors are</span>
 <span class="sd">            not homoscadastic in the linear representation. Avoid using</span>
-<span class="sd">            &quot;exp&quot; without errors.</span>
+<span class="sd">            "exp" without errors.</span>
 <span class="sd">        diffusivity_errors ([float]): A sequence of absolute errors in diffusivities. units: cm^2/s</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;exp&quot;</span><span class="p">]:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Mode must be &#39;linear&#39; or &#39;exp&#39;.&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"linear"</span><span class="p">,</span> <span class="s2">"exp"</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Mode must be 'linear' or 'exp'."</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"linear"</span><span class="p">:</span>
         <span class="n">t_1</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temps</span><span class="p">)</span>
         <span class="c1"># Do a least squares regression of log(D) vs 1/T</span>
         <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">t_1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temps</span><span class="p">))])</span><span class="o">.</span><span class="n">T</span>
@@ -996,12 +1075,12 @@
         <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">temps</span><span class="p">)</span>
         <span class="n">std_Ea</span> <span class="o">=</span> <span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">t_1</span><span class="p">)))</span> <span class="o">**</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">const</span><span class="o">.</span><span class="n">k</span> <span class="o">/</span> <span class="n">const</span><span class="o">.</span><span class="n">e</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="o">-</span><span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">const</span><span class="o">.</span><span class="n">k</span> <span class="o">/</span> <span class="n">const</span><span class="o">.</span><span class="n">e</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">std_Ea</span>
-    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;exp&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"exp"</span><span class="p">:</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">arrhenius</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Ea</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">c</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Ea</span> <span class="o">/</span> <span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">k</span> <span class="o">/</span> <span class="n">const</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">t</span><span class="p">))</span>
 
-        <span class="n">guess</span> <span class="o">=</span> <span class="n">fit_arrhenius</span><span class="p">(</span><span class="n">temps</span><span class="p">,</span> <span class="n">diffusivities</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># Use linear fit to get initial guess</span>
+        <span class="n">guess</span> <span class="o">=</span> <span class="n">fit_arrhenius</span><span class="p">(</span><span class="n">temps</span><span class="p">,</span> <span class="n">diffusivities</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"linear"</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>  <span class="c1"># Use linear fit to get initial guess</span>
 
         <span class="n">popt</span><span class="p">,</span> <span class="n">pcov</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span><span class="n">arrhenius</span><span class="p">,</span> <span class="n">temps</span><span class="p">,</span> <span class="n">diffusivities</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">diffusivity_errors</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">popt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">popt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">pcov</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">**</span> <span class="mf">0.5</span>
@@ -1011,8 +1090,8 @@
 
 <div class="viewcode-block" id="get_diffusivity_from_msd">
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.get_diffusivity_from_msd">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_diffusivity_from_msd</span><span class="p">(</span><span class="n">msd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">smoothed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;max&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_diffusivity_from_msd</span><span class="p">(</span><span class="n">msd</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">smoothed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"max"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns diffusivity and standard deviation of diffusivity.</span>
 
 <span class="sd">        D = 1 / 2dt * &lt;mean square displacement&gt;</span>
@@ -1029,19 +1108,19 @@
 <span class="sd">        smoothed (str): Whether to smooth the MSD, and what mode to smooth.</span>
 <span class="sd">            Supported modes are::</span>
 
-<span class="sd">            i. &quot;max&quot;, which tries to use the maximum #</span>
+<span class="sd">            i. "max", which tries to use the maximum #</span>
 <span class="sd">               of data points for each time origin, subject to a</span>
 <span class="sd">               minimum # of observations given by min_obs, and then</span>
 <span class="sd">               weights the observations based on the variance</span>
 <span class="sd">               accordingly. This is the default.</span>
-<span class="sd">            ii. &quot;constant&quot;, in which each timestep is averaged over</span>
+<span class="sd">            ii. "constant", in which each timestep is averaged over</span>
 <span class="sd">                the number of time_steps given by min_steps.</span>
 <span class="sd">            iii. None / False / any other false-like quantity. No</span>
 <span class="sd">               smoothing.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">weighted_lstsq</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">smoothed</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">smoothed</span> <span class="o">==</span> <span class="s2">"max"</span><span class="p">:</span>
             <span class="c1"># For max smoothing, we need to weight by variance.</span>
             <span class="n">w_root</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">w_root</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">b</span> <span class="o">*</span> <span class="n">w_root</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
@@ -1051,7 +1130,7 @@
     <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">dt</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
     <span class="n">a</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">dt</span>
     <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">_c</span><span class="p">),</span> <span class="n">res</span><span class="p">,</span> <span class="n">_rank</span><span class="p">,</span> <span class="n">_s</span> <span class="o">=</span> <span class="n">weighted_lstsq</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">msd</span><span class="p">)</span>
-    <span class="c1"># m shouldn&#39;t be negative</span>
+    <span class="c1"># m shouldn't be negative</span>
     <span class="n">m</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="mf">1e-15</span><span class="p">)</span>
 
     <span class="c1"># factor of 10 is to convert from Å^2/fs to cm^2/s</span>
@@ -1076,9 +1155,9 @@
 <div class="viewcode-block" id="get_extrapolated_diffusivity">
 <a class="viewcode-back" href="../../../../pymatgen.analysis.diffusion.analyzer.html#pymatgen.analysis.diffusion.analyzer.get_extrapolated_diffusivity">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_extrapolated_diffusivity</span><span class="p">(</span>
-    <span class="n">temps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">diffusivities</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">new_temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;exp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span>
+    <span class="n">temps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">diffusivities</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">new_temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"linear"</span><span class="p">,</span> <span class="s2">"exp"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"linear"</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns (Arrhenius) extrapolated diffusivity at new_temp.</span>
 
 <span class="sd">    Args:</span>
@@ -1090,7 +1169,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        (float) Diffusivity at extrapolated temp in cm^2/s.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Ea</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">fit_arrhenius</span><span class="p">(</span><span class="n">temps</span><span class="p">,</span> <span class="n">diffusivities</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">c</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Ea</span> <span class="o">/</span> <span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">k</span> <span class="o">/</span> <span class="n">const</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">new_temp</span><span class="p">))</span></div>
 
@@ -1105,7 +1184,7 @@
     <span class="n">structure</span><span class="p">:</span> <span class="n">Structure</span><span class="p">,</span>
     <span class="n">species</span><span class="p">:</span> <span class="n">SpeciesLike</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Returns extrapolated mS/cm conductivity.</span>
 
 <span class="sd">    Args:</span>
@@ -1118,7 +1197,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        (float) Conductivity at extrapolated temp in mS/cm.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">return</span> <span class="n">get_extrapolated_diffusivity</span><span class="p">(</span><span class="n">temps</span><span class="p">,</span> <span class="n">diffusivities</span><span class="p">,</span> <span class="n">new_temp</span><span class="p">)</span> <span class="o">*</span> <span class="n">get_conversion_factor</span><span class="p">(</span>
         <span class="n">structure</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">new_temp</span>
     <span class="p">)</span></div>
@@ -1131,11 +1210,11 @@
     <span class="n">temps</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">diffusivities</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">diffusivity_errors</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;exp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
-    <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;eV&quot;</span><span class="p">,</span> <span class="s2">&quot;meV&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;meV&quot;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"linear"</span><span class="p">,</span> <span class="s2">"exp"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"linear"</span><span class="p">,</span>
+    <span class="n">unit</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"eV"</span><span class="p">,</span> <span class="s2">"meV"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"meV"</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Axes</span><span class="p">:</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">"""</span>
 <span class="sd">    Returns an Arrhenius plot.</span>
 
 <span class="sd">    Args:</span>
@@ -1146,45 +1225,45 @@
 <span class="sd">            diffusivities. If None, no error bar is plotted.</span>
 <span class="sd">        mode (str): The fitting mode. See fit_arrhenius for details.</span>
 <span class="sd">        unit (str): The unit for the activation energy. Supported units are</span>
-<span class="sd">            &quot;eV&quot; and &quot;meV&quot;.</span>
+<span class="sd">            "eV" and "meV".</span>
 <span class="sd">        **kwargs:</span>
 <span class="sd">            Any keyword args supported by matplotlib.pyplot.plot.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A matplotlib.Axes object. Do ax.show() to show the plot.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">Ea</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">fit_arrhenius</span><span class="p">(</span><span class="n">temps</span><span class="p">,</span> <span class="n">diffusivities</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">diffusivity_errors</span><span class="p">)</span>
 
     <span class="n">ax</span> <span class="o">=</span> <span class="n">pretty_plot</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 
     <span class="c1"># log10 of the arrhenius fit</span>
-    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">temps</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">temps</span><span class="p">),</span> <span class="mi">100</span><span class="p">)</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;exp&quot;</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temps</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">temps</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">temps</span><span class="p">),</span> <span class="mi">100</span><span class="p">)</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"exp"</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temps</span><span class="p">)</span>
     <span class="n">arr</span> <span class="o">=</span> <span class="n">c</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Ea</span> <span class="o">/</span> <span class="p">(</span><span class="n">const</span><span class="o">.</span><span class="n">k</span> <span class="o">/</span> <span class="n">const</span><span class="o">.</span><span class="n">e</span> <span class="o">*</span> <span class="n">t</span><span class="p">))</span>
 
-    <span class="n">x</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temps</span><span class="p">)</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temps</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="mi">1000</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temps</span><span class="p">)</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"linear"</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">temps</span><span class="p">)</span>
 
-    <span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">diffusivities</span><span class="p">,</span> <span class="s2">&quot;ko&quot;</span><span class="p">,</span> <span class="n">x</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span> <span class="k">else</span> <span class="n">t</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="s2">&quot;k--&quot;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">diffusivities</span><span class="p">,</span> <span class="s2">"ko"</span><span class="p">,</span> <span class="n">x</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"linear"</span> <span class="k">else</span> <span class="n">t</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="s2">"k--"</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">diffusivity_errors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">diffusivity_errors</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span>
             <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n</span><span class="p">],</span>
             <span class="n">diffusivities</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n</span><span class="p">],</span>
             <span class="n">yerr</span><span class="o">=</span><span class="n">diffusivity_errors</span><span class="p">,</span>
-            <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;ko&quot;</span><span class="p">,</span>
-            <span class="n">ecolor</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
+            <span class="n">fmt</span><span class="o">=</span><span class="s2">"ko"</span><span class="p">,</span>
+            <span class="n">ecolor</span><span class="o">=</span><span class="s2">"k"</span><span class="p">,</span>
             <span class="n">capthick</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yscale</span><span class="p">(</span><span class="s2">"log"</span><span class="p">)</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"linear"</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
-        <span class="mf">0.6</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span> <span class="k">else</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="mf">0.6</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"linear"</span> <span class="k">else</span> <span class="mf">0.1</span><span class="p">,</span>
         <span class="mf">0.85</span><span class="p">,</span>
-        <span class="sa">f</span><span class="s2">&quot;E$_a$ = </span><span class="si">{</span><span class="p">(</span><span class="n">Ea</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">)</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> meV&quot;</span> <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">&quot;meV&quot;</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;E$_a$ = </span><span class="si">{</span><span class="n">Ea</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> eV&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"E$_a$ = </span><span class="si">{</span><span class="p">(</span><span class="n">Ea</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1000</span><span class="p">)</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> meV"</span> <span class="k">if</span> <span class="n">unit</span> <span class="o">==</span> <span class="s2">"meV"</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"E$_a$ = </span><span class="si">{</span><span class="n">Ea</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> eV"</span><span class="p">,</span>
         <span class="n">fontsize</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
         <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;D (cm$^2$/s)&quot;</span><span class="p">)</span>
-    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;1000/T (K$^{-1}$)&quot;</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span> <span class="k">else</span> <span class="s2">&quot;T (K)&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"D (cm$^2$/s)"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"1000/T (K$^{-1}$)"</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">"linear"</span> <span class="k">else</span> <span class="s2">"T (K)"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ax</span></div>
 
 </pre></div>
