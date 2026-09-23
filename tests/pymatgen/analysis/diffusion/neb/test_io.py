@@ -99,7 +99,7 @@ NPAR = 4
 NSW = 100
 PREC = Accurate
 SIGMA = 0.05"""
-        assert incar_string.strip() == expected_incar_str(incar_expect)
+        assert Incar.from_str(incar_string) == Incar.from_str(incar_expect)
 
 
 class MVLCINEBSetTest(unittest.TestCase):
