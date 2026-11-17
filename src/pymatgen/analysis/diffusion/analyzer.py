@@ -306,7 +306,7 @@ class DiffusionAnalyzer(MSONable):
             self.conductivity = 0.0
             self.diffusivity_components = np.array([0.0, 0.0, 0.0])
             self.conductivity_components = np.array([0.0, 0.0, 0.0])
-            self.max_framework_displacement = 0
+            self.max_framework_displacement = 0.0
         else:
             framework_disp = self.disp[framework_indices]
             drift = np.average(framework_disp, axis=0)[None, :, :]

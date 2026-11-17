@@ -453,7 +453,7 @@ class RadialDistributionFunctionFast:
         ref_species: SpeciesLike | list[SpeciesLike],
         species: SpeciesLike | list[SpeciesLike],
         is_average: bool = True,
-    ) -> tuple[np.ndarray, list]:
+    ) -> tuple[np.ndarray, list[np.ndarray] | np.ndarray]:
         """
         Returns running coordination number.
 
@@ -474,7 +474,7 @@ class RadialDistributionFunctionFast:
         density = [sum(i[j] for j in species) for i in self.density]
         cn = [np.cumsum(rdf * density[i] * 4.0 * np.pi * self.r**2 * self.dr) for i, rdf in enumerate(all_rdf)]
         if is_average:
-            cn = np.mean(cn, axis=0)
+            return self.r, np.mean(cn, axis=0)
         return self.r, cn
 
 
