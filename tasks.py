@@ -4,7 +4,7 @@ Deployment file to facilitate releases of pymatgen.analysis.diffusion.
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import glob
 import json
 import os
@@ -18,7 +18,7 @@ __author__ = "Shyue Ping Ong"
 __date__ = "Apr 29, 2012"
 
 
-NEW_VER = datetime.datetime.today().strftime("%Y.%-m.%-d")
+NEW_VER = dt.datetime.today().strftime("%Y.%-m.%-d")
 
 
 @task
